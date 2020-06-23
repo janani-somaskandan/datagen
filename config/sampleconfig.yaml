@@ -1,16 +1,45 @@
 ---
-number_of_users: 10
 activity_time_in_seconds: 60
-activity_ticker_in_seconds: 1
-activity_probablity_map:
-  DoSomething: 0.5
-  NoOp: 0.4
-  Exit: 0.1
-event_probablity_map:
-  E1: 0.2
-  E2: 0.3
-  E3: 0.1
-  E4: 0.1
-  E5: 0.3
 real_time: false
+user_id_prefix: U 
+user_segments: 
+  segment1:
+    number_of_users: 1
+    activity_ticker_in_seconds: 10
+    activity_probablity_map:
+      DoSomething: 0.5
+      NoOp: 0.499
+      Exit: 0.001
+    event_probablity_map:
+      E1: 0.2
+      E2: 0.3
+      E3: 0.1
+      E4: 0.1
+      E5: 0.3
+    event_attributes: 
+      E1: a1,a2,a3
+      E2: b1,b2,b3
+    user_attributes:
+      U1: ua1,ua2
+    set_attributes: true 
+  segment2:
+    number_of_users: 2
+    activity_ticker_in_seconds: 5
+    activity_probablity_map:
+      DoSomething: 0.5
+      NoOp: 0.499
+      Exit: 0.001
+    event_probablity_map:
+      E1: 0.2
+      E2: 0.3
+      E3: 0.1
+      E4: 0.1
+      E5: 0.3
+    event_attributes: 
+      E1: a1,a2,a3
+      E2: b1,b2,b3
+    user_attributes:
+      U4: ua1,ua2
+      U6: ua1,ua7
+    set_attributes: true
 ...

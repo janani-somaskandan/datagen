@@ -8,6 +8,7 @@ import(
 	"../registration"
 	"../config"
 	"fmt"
+	"sync"
 )
 
 func PreComputeRangeMap(probMap map[string]float64) (utils.RangeMap, int) {
@@ -47,57 +48,105 @@ func PreComputeRangeMap(probMap map[string]float64) (utils.RangeMap, int) {
 }
 
 
-func GenerateEvents(activityDuration int, userId string, eventProbRangeMap utils.RangeMap,
+func GenerateEvents(wg *sync.WaitGroup, segmentConfig config.UserSegment, activityDuration int, userId string, eventProbRangeMap utils.RangeMap,
 	activityProbRangeMap utils.RangeMap,eventMultiplier int, activityMultiplier int) {
 	
+	defer wg.Done()
 	rand.Seed(time.Now().UTC().UnixNano())
+	
+	var userAttributes string
+	if(segmentConfig.Set_attributes == true){
+		attr := segmentConfig.User_attributes[userId]
+		if(attr != ""){
+			userAttributes = "," + attr
+		}
+	}
 
+	fmt.Println("Starting ", userId)
     for i := 0; i < activityDuration; i++ {
 		activity := rand.Intn(activityMultiplier + 1)
 		activityName, _ := activityProbRangeMap.Get(activity)
-		fmt.Println(activityName)
 		// TODO Have enums for these
 		if activityName == "DoSomething" {
 			event := rand.Intn(eventMultiplier + 1)
 			eventName, ok := eventProbRangeMap.Get(event)
+
+			var eventAttributes string
+			if(segmentConfig.Set_attributes == true){
+				attr := segmentConfig.Event_attributes[eventName]
+				if(attr != ""){
+					eventAttributes = "," + attr
+				}
+			}
+
 			if ok == true {
 				op := 
 					userId +
 					"," +
 					eventName +
 					"," +
-					config.Config.Start_Time.Add(time.Second * time.Duration(i * config.Config.Activity_ticker_in_seconds)).String()
+					segmentConfig.Start_Time.Add(time.Second * time.Duration(i * segmentConfig.Activity_ticker_in_seconds)).String() +
+					userAttributes +
+					eventAttributes
+
 				 registration.WriterInstance.Write(op)
 				 if(config.Config.Real_Time == true){
-					time.Sleep(time.Duration(config.Config.Activity_ticker_in_seconds) * time.Second)
+					time.Sleep(time.Duration(segmentConfig.Activity_ticker_in_seconds) * time.Second)
 				 }
 			}
 		}	
 		if activityName == "Exit" {	
+			fmt.Println("Exit ", userId)
 			break
 		}
 	}
+	fmt.Println("Finished ", userId)
 }
 
-func Operate(){
+func OperatePerSegment(segmentWg *sync.WaitGroup, segmentName string, segment config.UserSegment, userRangeStart int){
 
-	fmt.Println(config.Config)
-	eventProbRangeMap, eventMultiplier := PreComputeRangeMap(config.Config.Event_probablity_map)
-	activityProbRangeMap, activityMultiplier := PreComputeRangeMap(config.Config.Activity_probablity_map)
+	defer segmentWg.Done()
+	var wg sync.WaitGroup
+	eventProbRangeMap, eventMultiplier := PreComputeRangeMap(segment.Event_probablity_map)
+	activityProbRangeMap, activityMultiplier := PreComputeRangeMap(segment.Activity_probablity_map)
 
 	//TODO Add logic to bring users back
-	for i := 1; i<= config.Config.Number_of_users; i++ {
+	for i := userRangeStart; i<= userRangeStart + segment.Number_of_users - 1; i++ {
+		wg.Add(1)
 		go GenerateEvents(
-			(int)(config.Config.Activity_time_in_seconds / config.Config.Activity_ticker_in_seconds), 
-			"U"+strconv.Itoa(i),
+			&wg,
+			segment,
+			(int)(config.Config.Activity_time_in_seconds / segment.Activity_ticker_in_seconds), 
+			config.Config.User_id_prefix+strconv.Itoa(i),
 			eventProbRangeMap,
 			activityProbRangeMap,
 			eventMultiplier,
 			activityMultiplier)
 	}
 	
-	//TODO Wait for events instead of having a standard wait
-	time.Sleep(30 * time.Second)
+	fmt.Println("Main: Waiting for ", segmentName ," to finish")
+	wg.Wait()
+	fmt.Println("Main: ", segmentName ," Completed")
+}
+
+func Operate(){
+
+	var segmentWg sync.WaitGroup
+	fmt.Println(config.Config)
+	var userCounter int = 1
+	userIndex := make(map[string]int)
+	for item, element := range config.Config.User_segments {
+		userIndex[item] = userCounter
+		userCounter = userCounter + element.Number_of_users
+	}
+
+	for item,element := range config.Config.User_segments {
+		segmentWg.Add(1)
+		go OperatePerSegment(&segmentWg, item, element, userIndex[item])
+	}
+	fmt.Println("Main: Waiting for Tasks to finish")
+	segmentWg.Wait()
+	fmt.Println("Main: Completed")
 }
 
 

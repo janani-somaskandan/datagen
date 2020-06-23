@@ -12,8 +12,19 @@ var m sync.Mutex
 func RegisterOutputFile(FileName string){
 
 	workingDirectory, _:= os.Getwd()
-	var err error
-	file, err = os.OpenFile(workingDirectory +"/"+ FileName, os.O_APPEND|os.O_WRONLY, 0644)
+	path := workingDirectory +"/"+ FileName
+
+	var _, err = os.Stat(path)
+
+    // create file if not exists
+    if os.IsNotExist(err) {
+        var _, err = os.Create(path)
+        if err != nil {
+            return
+        }
+    }
+
+	file, err = os.OpenFile(path, os.O_APPEND|os.O_WRONLY, 0644)
 	if(err != nil){
 
 	}
