@@ -8,7 +8,7 @@ import(
 
 func main(){
 	registration.RegisterHandlers()
-	operations.Operate()
+	operations.OperateV2()
 	
 }  
 

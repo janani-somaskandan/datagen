@@ -4,18 +4,16 @@ import(
 	"./parser"
 	"../utils"
 	"time"
-	"fmt"
 )
 
-var Config Configuration
-func GenerateInputConfig(parserInstance parser.IParser, FileName string){
+var ConfigV2 ConfigurationV2
+func GenerateInputConfigV2(parserInstance parser.IParser, FileName string){
 
-	InputConfig := parserInstance.Parse(utils.ReadFile(FileName), Config)
-	Config = *InputConfig.(*Configuration)
-	for _, element := range Config.User_segments {
+	InputConfig := parserInstance.Parse(utils.ReadFile(FileName), ConfigV2)
+	ConfigV2 = *InputConfig.(*ConfigurationV2)
+	for _, element := range ConfigV2.User_segments {
 		if element.Start_Time.IsZero() {
 			element.Start_Time = time.Now().UTC()
 		}
 	}
-	fmt.Println(Config)
 }

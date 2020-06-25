@@ -1,0 +1,84 @@
+---
+activity_time_in_seconds: 60
+real_time: false
+user_id_prefix: U 
+user_segments: 
+  segment1:
+    number_of_users: 2
+    activity_ticker_in_seconds: 1
+    activity_probablity_map:
+      DoSomething: 0.5
+      NoOp: 0.5
+      Exit: 0
+    event_probablity_map:
+      correlation_matrix:
+        events:
+          E1:
+            E1: 0.2
+            E2: 0.1
+            E4: 0.2
+            E5: 0.5
+          E2:
+            E2: 0.1
+            E4: 0.9
+          E3:
+            E1: 0.5
+            E2: 0.5
+          E4:
+            E1: 0.5
+            E5: 0.5
+          E5:
+            E3: 1.0	
+        seed_events: ['E5']
+      independent_events:
+        E6: 0.01
+        E7: 0.05
+        E8: 0.03
+        E9: 0.01
+        E10: 0.2
+    event_attributes: 
+      E1: a1,a2,a3
+      E2: b1,b2,b3
+    user_attributes:
+      U1: ua1,ua2
+    set_attributes: true 
+  segment2:
+    number_of_users: 10
+    activity_ticker_in_seconds: 10
+    activity_probablity_map:
+      DoSomething: 0.5
+      NoOp: 0.5
+      Exit: 0
+    event_probablity_map:
+      correlation_matrix:
+        events:
+          E1:
+            E1: 0.2
+            E2: 0.1
+            E4: 0.2
+            E5: 0.5
+          E2:
+            E2: 0.1
+            E4: 0.9
+          E3:
+            E1: 0.5
+            E2: 0.5
+          E4:
+            E1: 0.5
+            E5: 0.5
+          E5:
+            E3: 1.0	
+        seed_events: ['E1','E2','E3']
+      independent_events:
+        E6: 0.01
+        E7: 0.05
+        E8: 0.03
+        E9: 0.01
+        E10: 0.2
+    event_attributes: 
+      E1: a1,a2,a3
+      E2: b1,b2,b3
+    user_attributes:
+      U1: ua1,ua2
+    set_attributes: true 
+...
