@@ -9,12 +9,14 @@ import(
 	"../config"
 	"fmt"
 	"sync"
+	"reflect"
 )
 
 func OperateV2(){
 
-	//Declaring WaitGroup for SegmentLevel Concurrency
+	//Declaring WaitGroup for SegmentLevel and newUser Concurrency
 	var segmentWg sync.WaitGroup
+	var newUserWg sync.WaitGroup
 
 	// Calculating user count level indexing across segments
 	var userCounter int = 1
@@ -25,28 +27,85 @@ func OperateV2(){
 	}
 
 	// Operating per user segment
+	segmentStatus := make(map[string]bool)
 	for item,element := range config.ConfigV2.User_segments {
 		segmentWg.Add(1)
-		go OperateOnSegment(&segmentWg, item, element, userIndex[item])
+		segmentStatus[item] = false
+		go OperateOnSegment(&segmentWg, item, element, userIndex[item], userIndex[item] + element.Number_of_users -1, segmentStatus)
 	}
 
 	fmt.Println("Main: Waiting for Tasks to finish")
+
+	allSegmentsDone := false
+	newUserSegmentStatus := make(map[string]bool)
+	CreateNewUserProbMap()
+	
+	for i := userCounter; allSegmentsDone == false; i++ {
+
+		time.Sleep(time.Duration(config.ConfigV2.New_user_poll_time) * time.Second)
+		if(GetRandomNewUserInsertStatus() == true) {
+			
+			seg := GetRandomSegment()
+			fmt.Println("Getting User ", i ," to the system with Segment ", seg)
+			newUserWg.Add(1)
+			go OperateOnSegment(&newUserWg,seg,config.ConfigV2.User_segments[seg],i,i,newUserSegmentStatus)
+			allSegmentsDone = CheckIfAllUsersDone(segmentStatus)
+				
+		}
+	}
+
+	fmt.Println("Exit")
+	newUserWg.Wait()
 	segmentWg.Wait()
 	fmt.Println("Main: Completed")
 }
 
-func OperateOnSegment(segmentWg *sync.WaitGroup, segmentName string, segment config.UserSegmentV2, userRangeStart int){
+var newUserRangeMap utils.RangeMap
+var newUserMultiplier int
+func CreateNewUserProbMap(){
+	
+	newUserProbablityMap := make(map[string]float64)
+	newUserProbablityMap["Insert"] = config.ConfigV2.New_user_probablity
+	newUserProbablityMap["NoInsert"] = (1.0 - config.ConfigV2.New_user_probablity)
+	newUserRangeMap, newUserMultiplier = ComputeRangeMap(newUserProbablityMap)
+}
+
+func GetRandomNewUserInsertStatus()bool{
+	newUserInsert, _ := newUserRangeMap.Get(rand.Intn(newUserMultiplier))
+	if(newUserInsert == "Insert") {
+		return true
+	}
+	return false
+}
+
+func GetRandomSegment()string{
+	segmentKeys := reflect.ValueOf(config.ConfigV2.User_segments).MapKeys()
+	seg := (segmentKeys[rand.Intn(len(segmentKeys))].Interface()).(string)
+	return seg
+}
+func CheckIfAllUsersDone(segmentStatus map[string]bool) bool {
+
+	allSegmentsDone := true
+	for _,element := range segmentStatus {
+		if element == false {
+			allSegmentsDone = false
+			break
+		}
+	}
+	return allSegmentsDone
+}
+
+func OperateOnSegment(segmentWg *sync.WaitGroup, segmentName string, segment config.UserSegmentV2, userRangeStart int, userRangeEnd int, segmentStatus map[string]bool){
 
 	defer segmentWg.Done()
 	var wg sync.WaitGroup
 
-	fmt.Println("Main: Operating on ", segmentName ," with User Range ", userRangeStart , "-" ,userRangeStart + segment.Number_of_users - 1)
+	fmt.Println("Main: Operating on ", segmentName ," with User Range ", userRangeStart , "-" ,userRangeEnd)
 	// Pre-Computing Probablity RangeMap for ActivityProb, EventProbablity, EventCorrelation
 	probMap := PreComputeRangeMap(segment)
-
 	//TODO: janani Add logic to bring users back
 	//Generating events per user in the segment
-	for i := userRangeStart; i<= userRangeStart + segment.Number_of_users - 1; i++ {
+	for i := userRangeStart; i<= userRangeEnd; i++ {
 		wg.Add(1)
 		go GenerateEvents(
 			&wg,
@@ -56,9 +115,10 @@ func OperateOnSegment(segmentWg *sync.WaitGroup, segmentName string, segment con
 			probMap)
 	}
 	
-	fmt.Println("Main: Waiting for ", segmentName ," to finish")
+	fmt.Println("Main: Waiting for ", segmentName ," to finish for user Range ", userRangeStart , "-" ,userRangeEnd)
 	wg.Wait()
-	fmt.Println("Main: ", segmentName ," Completed")
+	segmentStatus[segmentName] = true
+	fmt.Println("Main: ", segmentName ," Completed for user Range ", userRangeStart , "-" ,userRangeEnd)
 }
 
 type ProbMap struct {
@@ -82,10 +142,11 @@ func PreComputeRangeMap(segment config.UserSegmentV2) (ProbMap) {
 
 	events := make(map[string]float64)
 	sum := 0.0
-	for _, element := range segment.Event_probablity_map.Independent_events {
+	for item, element := range segment.Event_probablity_map.Independent_events {
 		sum += element
+		events[item] = element
 	}
-	events =  segment.Event_probablity_map.Independent_events
+
 	events["EventCorrelation"] = (1.0 - sum)
 	probMap.eventProbRangeMap, probMap.eventMultiplier = ComputeRangeMap(events)
 	probMap.activityProbRangeMap, probMap.activityMultiplier = ComputeRangeMap(segment.Activity_probablity_map)
@@ -185,7 +246,7 @@ func GetRandomEventWithCorrelation(lastKnownGoodState *string, seedEvents []stri
 }
 
 func ComputeRangeMap(probMap map[string]float64) (utils.RangeMap, int) {
-	
+
 	// Assuming sum of the probablities of elements is 1
 	// TODO janani: yet to calculate relative probablities if the sum is not 1
 	min := 1.0
@@ -204,17 +265,12 @@ func ComputeRangeMap(probMap map[string]float64) (utils.RangeMap, int) {
 		temp = min * multiplier;
 	}
 
-
-	for item,element := range probMap {
-		probMap[item] = element * multiplier
-	}		
-
 	start := 0
 	probRangeMap := utils.RangeMap{}
 	for item,element := range probMap {
-		probRangeMap.Keys = append(probRangeMap.Keys,utils.Range{ start, start+int(element)-1 })
+		probRangeMap.Keys = append(probRangeMap.Keys,utils.Range{ start, start+int(element * multiplier)-1 })
 		probRangeMap.Values = append(probRangeMap.Values, item)
-		start = start + int(element)
+		start = start + int(element * multiplier)
 	}
 
 	return probRangeMap, int(multiplier)

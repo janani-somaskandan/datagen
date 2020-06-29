@@ -26,8 +26,11 @@ type UserSegmentV2 struct {
     
 }
 type ConfigurationV2 struct {  
+    Output_file_name string
     Activity_time_in_seconds int
     Real_Time bool
     User_id_prefix string
     User_segments map[string]UserSegmentV2
+    New_user_poll_time int
+    New_user_probablity float64
 }

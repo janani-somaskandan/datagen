@@ -16,5 +16,5 @@ func RegisterHandlers(){
 	_parser = parser.YamlParser{}
 	config.GenerateInputConfigV2(_parser,"sampleconfigV2.yaml")
 	WriterInstance = utils.FileWriter{}
-    utils.RegisterOutputFile("output.txt")
+    utils.RegisterOutputFile(config.ConfigV2.Output_file_name)
 }
