@@ -15,6 +15,8 @@ func RegisterHandlers(){
 	var _parser parser.IParser
 	_parser = parser.YamlParser{}
 	config.GenerateInputConfigV2(_parser,"sampleconfigV2.yaml")
-	WriterInstance = utils.FileWriter{}
-    utils.RegisterOutputFile(config.ConfigV2.Output_file_name)
+	// WriterInstance = utils.FileWriter{}
+	// WriterInstance.RegisterOutputFile(config.ConfigV2.Output_file_name)
+	WriterInstance = utils.LogWriter{}
+    WriterInstance.RegisterOutputFile(config.ConfigV2.Output_file_name)
 }

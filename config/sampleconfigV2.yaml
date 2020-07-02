@@ -1,7 +1,7 @@
 # Assign Probablitites for independent events so that (1 - sum of probablities of independent events)
 # will be the total probablity of correlated events
 ---
-output_file_name: output.txt
+output_file_name: outputLog.log
 activity_time_in_seconds: 300
 real_time: true
 user_id_prefix: U 
@@ -42,10 +42,25 @@ user_segments:
         E9: 0.01
         E10: 0.2
     event_attributes: 
-      E1: a1,a2,a3
-      E2: b1,b2,b3
+      E1: 
+        category: ea1
+        type: ea2
+      E2:
+        category: ea3
+        type: ea2
+      E3:
+        category: ea1
+        type: ea4
     user_attributes:
-      U1: ua1,ua2
+      U1:
+        age: u1
+        gender: u2
+      U2:
+        age: u1
+        gender: u3
+      U3:
+        age: u4
+        gender: u2
     set_attributes: true 
   segment2:
     number_of_users: 10
@@ -81,9 +96,24 @@ user_segments:
         E9: 0.01
         E10: 0.2
     event_attributes: 
-      E1: a1,a2,a3
-      E2: b1,b2,b3
+      E1: 
+        category: ea1
+        type: ea2
+      E2:
+        category: ea3
+        type: ea2
+      E3:
+        category: ea1
+        type: ea4
     user_attributes:
-      U1: ua1,ua2
+      U1:
+        age: u1
+        gender: u2
+      U2:
+        age: u1
+        gender: u3
+      U3:
+        age: u4
+        gender: u2
     set_attributes: true 
 ...

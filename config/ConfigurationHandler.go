@@ -14,10 +14,8 @@ func GenerateInputConfigV2(parserInstance parser.IParser, FileName string){
 	ConfigV2 = *InputConfig.(*ConfigurationV2)
 	for item, element := range ConfigV2.User_segments {
 		if element.Start_Time.IsZero() {
-			fmt.Println("setting current time")
 			element.Start_Time = time.Now().UTC()
 			ConfigV2.User_segments[item] = element
-			fmt.Println(element)
 		}
 	}
 	fmt.Println(ConfigV2)

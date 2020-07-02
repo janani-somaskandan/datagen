@@ -20,8 +20,8 @@ type UserSegmentV2 struct {
     Activity_probablity_map map[string]float64
     Event_probablity_map EventProbablity
     Start_Time time.Time
-    Event_attributes map[string]string
-    User_attributes map[string]string
+    Event_attributes map[string]map[string]string
+    User_attributes map[string]map[string]string
     Set_attributes bool
     
 }

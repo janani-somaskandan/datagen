@@ -10,6 +10,7 @@ import(
 	"fmt"
 	"sync"
 	"reflect"
+	"encoding/json"
 )
 
 func OperateV2(){
@@ -26,12 +27,18 @@ func OperateV2(){
 		userCounter = userCounter + element.Number_of_users 
 	}
 
+	// Pre-Computing Probablity RangeMap for ActivityProb, EventProbablity, EventCorrelation
+	segmentProbMap := make(map[string]ProbMap)
+	for item, element := range config.ConfigV2.User_segments {
+		segmentProbMap[item] = PreComputeRangeMap(element)
+	}
+
 	// Operating per user segment
 	segmentStatus := make(map[string]bool)
 	for item,element := range config.ConfigV2.User_segments {
 		segmentWg.Add(1)
 		segmentStatus[item] = false
-		go OperateOnSegment(&segmentWg, item, element, userIndex[item], userIndex[item] + element.Number_of_users -1, segmentStatus)
+		go OperateOnSegment(&segmentWg, item, element, segmentProbMap[item], userIndex[item], userIndex[item] + element.Number_of_users -1, segmentStatus)
 	}
 
 	fmt.Println("Main: Waiting for Tasks to finish")
@@ -48,7 +55,7 @@ func OperateV2(){
 			seg := GetRandomSegment()
 			fmt.Println("Getting User ", i ," to the system with Segment ", seg)
 			newUserWg.Add(1)
-			go OperateOnSegment(&newUserWg,seg,config.ConfigV2.User_segments[seg],i,i,newUserSegmentStatus)
+			go OperateOnSegment(&newUserWg,seg,config.ConfigV2.User_segments[seg],segmentProbMap[seg],i,i,newUserSegmentStatus)
 			allSegmentsDone = CheckIfAllUsersDone(segmentStatus)
 				
 		}
@@ -95,15 +102,12 @@ func CheckIfAllUsersDone(segmentStatus map[string]bool) bool {
 	return allSegmentsDone
 }
 
-func OperateOnSegment(segmentWg *sync.WaitGroup, segmentName string, segment config.UserSegmentV2, userRangeStart int, userRangeEnd int, segmentStatus map[string]bool){
+func OperateOnSegment(segmentWg *sync.WaitGroup, segmentName string, segment config.UserSegmentV2,probMap ProbMap,userRangeStart int, userRangeEnd int, segmentStatus map[string]bool){
 
 	defer segmentWg.Done()
 	var wg sync.WaitGroup
 
 	fmt.Println("Main: Operating on ", segmentName ," with User Range ", userRangeStart , "-" ,userRangeEnd)
-	// Pre-Computing Probablity RangeMap for ActivityProb, EventProbablity, EventCorrelation
-	probMap := PreComputeRangeMap(segment)
-	//TODO: janani Add logic to bring users back
 	//Generating events per user in the segment
 	for i := userRangeStart; i<= userRangeEnd; i++ {
 		wg.Add(1)
@@ -176,14 +180,7 @@ func GenerateEvents(wg *sync.WaitGroup, segmentConfig config.UserSegmentV2, acti
 			}
 			eventAttributes := SetEventAttributes(segmentConfig, event)
 
-			op := 
-				userId +
-				"," +
-				event +
-				"," +
-				segmentConfig.Start_Time.Add(time.Second * time.Duration(i * segmentConfig.Activity_ticker_in_seconds)).String() +
-				userAttributes +
-				eventAttributes
+			op := FormatOutput(segmentConfig, userId, event, i, userAttributes, eventAttributes)
 
 			registration.WriterInstance.Write(op)
 			WaitIfRealTime(config.ConfigV2.Real_Time, segmentConfig.Activity_ticker_in_seconds)
@@ -193,29 +190,49 @@ func GenerateEvents(wg *sync.WaitGroup, segmentConfig config.UserSegmentV2, acti
 	fmt.Println("Finished ", userId)
 }
 
+func FormatOutput(segmentConfig config.UserSegmentV2, userId string, event string, eventCounter int, userAttributes map[string]string, eventAttributes map[string]string) (string){
+
+	type output struct {
+		UserId string `json:"user_id"`
+		Event string `json:"event_name"`
+		Timestamp int `json:"timestamp"`
+		UserAttributes map[string]string `json:"user_properties"`
+		EventAttributes map[string]string `json:"event_properties"`
+	}
+
+	var op output
+	op.UserId = userId
+	op.Event = event
+	op.Timestamp, _ = strconv.Atoi(fmt.Sprintf("%v", segmentConfig.Start_Time.Add(time.Second * time.Duration(eventCounter * segmentConfig.Activity_ticker_in_seconds)).UnixNano()))
+	op.UserAttributes = userAttributes
+	op.EventAttributes = eventAttributes
+	e, _ := json.Marshal(&op)
+	return string(e)
+}
+
 func WaitIfRealTime(realTime bool, duration int) {
 	if(realTime == true){
 		time.Sleep(time.Duration(duration) * time.Second)
 	}
 }
 
-func SetUserAttributes(segmentConfig config.UserSegmentV2, userId string) string{
-	var userAttributes string
+func SetUserAttributes(segmentConfig config.UserSegmentV2, userId string) map[string]string{
+	var userAttributes map[string]string
 	if(segmentConfig.Set_attributes == true){
 		attr := segmentConfig.User_attributes[userId]
-		if(attr != ""){
-			userAttributes = "," + attr
+		if(attr != nil){
+			userAttributes = attr
 		}
 	}
 	return userAttributes
 }
 
-func SetEventAttributes(segmentConfig config.UserSegmentV2,eventName string) string{
-	var eventAttributes string
+func SetEventAttributes(segmentConfig config.UserSegmentV2,eventName string) map[string]string{
+	var eventAttributes map[string]string
 	if(segmentConfig.Set_attributes == true){
 		attr := segmentConfig.Event_attributes[eventName]
-		if(attr != ""){
-			eventAttributes = "," + attr
+		if(attr != nil){
+			eventAttributes = attr
 		}
 	}
 	return eventAttributes
