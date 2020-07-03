@@ -1,6 +1,9 @@
 package utils
 
-// This code is from github
+/* This code is from github
+Implementation of Range Map
+*/
+
 import
 (
 "sort"

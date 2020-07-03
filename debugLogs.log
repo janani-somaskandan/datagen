@@ -1,0 +1,347 @@
+2020/07/03 14:58:05 Registering Handlers
+2020/07/03 14:58:05 Registering Yaml Parser
+2020/07/03 14:58:05 Processing input config - sampleconfigV2.yaml
+2020/07/03 14:58:05 Operating with config {test1.log 60 true U map[segment1:{100 1 map[DoSomething:0.5 Exit:0 NoOp:0.5] {{map[E1:map[E1:0.2 E2:0.1 E4:0.2 E5:0.5] E2:map[E2:0.1 E4:0.9] E3:map[E1:0.5 E2:0.5] E4:map[E1:0.5 E5:0.5] E5:map[E3:1]] [E5]} map[E10:0.2 E6:0.01 E7:0.05 E8:0.03 E9:0.01]} 2020-07-03 09:28:05.894645057 +0000 UTC map[E1:map[category:ea1 type:ea2] E2:map[category:ea3 type:ea2] E3:map[category:ea1 type:ea4]] map[U1:map[age:u1 gender:u2] U2:map[age:u1 gender:u3] U3:map[age:u4 gender:u2]] true}] 1 0.5}
+2020/07/03 14:58:05 Registering Output to Log Writer
+2020/07/03 14:58:05 Registration Done !!!
+2020/07/03 14:58:05 UserIndex Map map[segment1:1]
+2020/07/03 14:58:05 RangeMaps {{[{0 4} {5 9}] [Insert NoInsert]} 10 map[segment1:{map[E1:{[{0 1} {2 2} {3 4} {5 9}] [E1 E2 E4 E5]} E2:{[{0 0} {1 9}] [E2 E4]} E3:{[{0 4} {5 9}] [E2 E1]} E4:{[{0 4} {5 9}] [E1 E5]} E5:{[{0 9}] [E3]}] map[E1:10 E2:10 E3:10 E4:10 E5:10] {[{0 69} {70 72} {73 73} {74 93} {94 94} {95 99}] [EventCorrelation E8 E9 E10 E6 E7]} 100 {[{0 4} {5 9} {10 9}] [DoSomething NoOp Exit]} 10}]}
+2020/07/03 14:58:05 Main: Waiting for All Segments to finish
+2020/07/03 14:58:05 Main: Operating on segment1 with User Range 1 - 100
+2020/07/03 14:58:05 Starting U11 for duration 60
+2020/07/03 14:58:05 Main: Waiting for segment1 to finish for user Range 1 - 100
+2020/07/03 14:58:05 Starting U100 for duration 60
+2020/07/03 14:58:05 Starting U12 for duration 60
+2020/07/03 14:58:05 Starting U13 for duration 60
+2020/07/03 14:58:05 Starting U14 for duration 60
+2020/07/03 14:58:05 Starting U15 for duration 60
+2020/07/03 14:58:05 Starting U16 for duration 60
+2020/07/03 14:58:05 Starting U1 for duration 60
+2020/07/03 14:58:05 Starting U17 for duration 60
+2020/07/03 14:58:05 Starting U18 for duration 60
+2020/07/03 14:58:05 Starting U2 for duration 60
+2020/07/03 14:58:05 Starting U3 for duration 60
+2020/07/03 14:58:05 Starting U19 for duration 60
+2020/07/03 14:58:05 Starting U20 for duration 60
+2020/07/03 14:58:05 Starting U21 for duration 60
+2020/07/03 14:58:05 Starting U5 for duration 60
+2020/07/03 14:58:05 Starting U6 for duration 60
+2020/07/03 14:58:05 Starting U23 for duration 60
+2020/07/03 14:58:05 Starting U24 for duration 60
+2020/07/03 14:58:05 Starting U7 for duration 60
+2020/07/03 14:58:05 Starting U25 for duration 60
+2020/07/03 14:58:05 Starting U8 for duration 60
+2020/07/03 14:58:05 Starting U26 for duration 60
+2020/07/03 14:58:05 Starting U27 for duration 60
+2020/07/03 14:58:05 Starting U9 for duration 60
+2020/07/03 14:58:05 Starting U29 for duration 60
+2020/07/03 14:58:05 Starting U28 for duration 60
+2020/07/03 14:58:05 Starting U10 for duration 60
+2020/07/03 14:58:05 Starting U30 for duration 60
+2020/07/03 14:58:05 Starting U31 for duration 60
+2020/07/03 14:58:05 Starting U32 for duration 60
+2020/07/03 14:58:05 Starting U33 for duration 60
+2020/07/03 14:58:05 Starting U34 for duration 60
+2020/07/03 14:58:05 Starting U35 for duration 60
+2020/07/03 14:58:05 Starting U22 for duration 60
+2020/07/03 14:58:05 Starting U36 for duration 60
+2020/07/03 14:58:05 Starting U37 for duration 60
+2020/07/03 14:58:05 Starting U69 for duration 60
+2020/07/03 14:58:05 Starting U70 for duration 60
+2020/07/03 14:58:05 Starting U72 for duration 60
+2020/07/03 14:58:05 Starting U73 for duration 60
+2020/07/03 14:58:05 Starting U38 for duration 60
+2020/07/03 14:58:05 Starting U39 for duration 60
+2020/07/03 14:58:05 Starting U74 for duration 60
+2020/07/03 14:58:05 Starting U75 for duration 60
+2020/07/03 14:58:05 Starting U76 for duration 60
+2020/07/03 14:58:05 Starting U40 for duration 60
+2020/07/03 14:58:05 Starting U77 for duration 60
+2020/07/03 14:58:05 Starting U78 for duration 60
+2020/07/03 14:58:05 Starting U79 for duration 60
+2020/07/03 14:58:05 Starting U41 for duration 60
+2020/07/03 14:58:05 Starting U80 for duration 60
+2020/07/03 14:58:05 Starting U81 for duration 60
+2020/07/03 14:58:05 Starting U82 for duration 60
+2020/07/03 14:58:05 Starting U42 for duration 60
+2020/07/03 14:58:05 Starting U83 for duration 60
+2020/07/03 14:58:05 Starting U84 for duration 60
+2020/07/03 14:58:05 Starting U43 for duration 60
+2020/07/03 14:58:05 Starting U88 for duration 60
+2020/07/03 14:58:05 Starting U89 for duration 60
+2020/07/03 14:58:05 Starting U44 for duration 60
+2020/07/03 14:58:05 Starting U90 for duration 60
+2020/07/03 14:58:05 Starting U45 for duration 60
+2020/07/03 14:58:05 Starting U91 for duration 60
+2020/07/03 14:58:05 Starting U92 for duration 60
+2020/07/03 14:58:05 Starting U46 for duration 60
+2020/07/03 14:58:05 Starting U94 for duration 60
+2020/07/03 14:58:05 Starting U95 for duration 60
+2020/07/03 14:58:05 Starting U93 for duration 60
+2020/07/03 14:58:05 Starting U96 for duration 60
+2020/07/03 14:58:05 Starting U97 for duration 60
+2020/07/03 14:58:05 Starting U47 for duration 60
+2020/07/03 14:58:05 Starting U48 for duration 60
+2020/07/03 14:58:05 Starting U98 for duration 60
+2020/07/03 14:58:05 Starting U4 for duration 60
+2020/07/03 14:58:05 Starting U49 for duration 60
+2020/07/03 14:58:05 Starting U99 for duration 60
+2020/07/03 14:58:05 Starting U50 for duration 60
+2020/07/03 14:58:05 Starting U66 for duration 60
+2020/07/03 14:58:05 Starting U51 for duration 60
+2020/07/03 14:58:05 Starting U52 for duration 60
+2020/07/03 14:58:05 Starting U67 for duration 60
+2020/07/03 14:58:05 Starting U53 for duration 60
+2020/07/03 14:58:05 Starting U68 for duration 60
+2020/07/03 14:58:05 Starting U54 for duration 60
+2020/07/03 14:58:05 Starting U71 for duration 60
+2020/07/03 14:58:05 Starting U85 for duration 60
+2020/07/03 14:58:05 Starting U55 for duration 60
+2020/07/03 14:58:05 Starting U86 for duration 60
+2020/07/03 14:58:05 Starting U56 for duration 60
+2020/07/03 14:58:05 Starting U87 for duration 60
+2020/07/03 14:58:05 Starting U58 for duration 60
+2020/07/03 14:58:05 Starting U59 for duration 60
+2020/07/03 14:58:05 Starting U60 for duration 60
+2020/07/03 14:58:05 Starting U61 for duration 60
+2020/07/03 14:58:05 Starting U57 for duration 60
+2020/07/03 14:58:05 Starting U65 for duration 60
+2020/07/03 14:58:05 Starting U64 for duration 60
+2020/07/03 14:58:05 Starting U62 for duration 60
+2020/07/03 14:58:05 Starting U63 for duration 60
+2020/07/03 14:58:06 Getting User 101 to the system with Segment segment1
+2020/07/03 14:58:06 Main: Operating on segment1 with User Range 101 - 101
+2020/07/03 14:58:06 Main: Waiting for segment1 to finish for user Range 101 - 101
+2020/07/03 14:58:06 Starting U101 for duration 60
+2020/07/03 14:58:09 Getting User 104 to the system with Segment segment1
+2020/07/03 14:58:09 Main: Operating on segment1 with User Range 104 - 104
+2020/07/03 14:58:09 Main: Waiting for segment1 to finish for user Range 104 - 104
+2020/07/03 14:58:09 Starting U104 for duration 60
+2020/07/03 14:58:10 Getting User 105 to the system with Segment segment1
+2020/07/03 14:58:10 Main: Operating on segment1 with User Range 105 - 105
+2020/07/03 14:58:10 Main: Waiting for segment1 to finish for user Range 105 - 105
+2020/07/03 14:58:10 Starting U105 for duration 60
+2020/07/03 14:58:13 Getting User 108 to the system with Segment segment1
+2020/07/03 14:58:13 Main: Operating on segment1 with User Range 108 - 108
+2020/07/03 14:58:13 Main: Waiting for segment1 to finish for user Range 108 - 108
+2020/07/03 14:58:13 Starting U108 for duration 60
+2020/07/03 14:58:17 Getting User 112 to the system with Segment segment1
+2020/07/03 14:58:17 Main: Operating on segment1 with User Range 112 - 112
+2020/07/03 14:58:17 Main: Waiting for segment1 to finish for user Range 112 - 112
+2020/07/03 14:58:17 Starting U112 for duration 60
+2020/07/03 14:58:18 Getting User 113 to the system with Segment segment1
+2020/07/03 14:58:18 Main: Operating on segment1 with User Range 113 - 113
+2020/07/03 14:58:18 Main: Waiting for segment1 to finish for user Range 113 - 113
+2020/07/03 14:58:18 Starting U113 for duration 60
+2020/07/03 14:58:19 Getting User 114 to the system with Segment segment1
+2020/07/03 14:58:19 Main: Operating on segment1 with User Range 114 - 114
+2020/07/03 14:58:19 Main: Waiting for segment1 to finish for user Range 114 - 114
+2020/07/03 14:58:19 Starting U114 for duration 60
+2020/07/03 14:58:22 Getting User 117 to the system with Segment segment1
+2020/07/03 14:58:22 Main: Operating on segment1 with User Range 117 - 117
+2020/07/03 14:58:22 Main: Waiting for segment1 to finish for user Range 117 - 117
+2020/07/03 14:58:22 Starting U117 for duration 60
+2020/07/03 14:58:24 Getting User 119 to the system with Segment segment1
+2020/07/03 14:58:24 Main: Operating on segment1 with User Range 119 - 119
+2020/07/03 14:58:24 Main: Waiting for segment1 to finish for user Range 119 - 119
+2020/07/03 14:58:24 Starting U119 for duration 60
+2020/07/03 14:58:25 Getting User 120 to the system with Segment segment1
+2020/07/03 14:58:25 Main: Operating on segment1 with User Range 120 - 120
+2020/07/03 14:58:25 Main: Waiting for segment1 to finish for user Range 120 - 120
+2020/07/03 14:58:25 Starting U120 for duration 60
+2020/07/03 14:58:25 Done U42
+2020/07/03 14:58:27 Done U100
+2020/07/03 14:58:27 Done U60
+2020/07/03 14:58:28 Done U21
+2020/07/03 14:58:28 Done U94
+2020/07/03 14:58:29 Getting User 124 to the system with Segment segment1
+2020/07/03 14:58:29 Main: Operating on segment1 with User Range 124 - 124
+2020/07/03 14:58:29 Main: Waiting for segment1 to finish for user Range 124 - 124
+2020/07/03 14:58:29 Starting U124 for duration 60
+2020/07/03 14:58:29 Done U101
+2020/07/03 14:58:29 Main: segment1 Completed for user Range 101 - 101
+2020/07/03 14:58:29 Done U43
+2020/07/03 14:58:29 Done U49
+2020/07/03 14:58:29 Done U73
+2020/07/03 14:58:29 Done U56
+2020/07/03 14:58:29 Done U87
+2020/07/03 14:58:30 Getting User 125 to the system with Segment segment1
+2020/07/03 14:58:30 Main: Operating on segment1 with User Range 125 - 125
+2020/07/03 14:58:30 Main: Waiting for segment1 to finish for user Range 125 - 125
+2020/07/03 14:58:30 Starting U125 for duration 60
+2020/07/03 14:58:30 Done U20
+2020/07/03 14:58:30 Done U9
+2020/07/03 14:58:30 Done U83
+2020/07/03 14:58:31 Done U91
+2020/07/03 14:58:31 Done U59
+2020/07/03 14:58:31 Done U90
+2020/07/03 14:58:31 Done U58
+2020/07/03 14:58:32 Getting User 127 to the system with Segment segment1
+2020/07/03 14:58:32 Main: Operating on segment1 with User Range 127 - 127
+2020/07/03 14:58:32 Main: Waiting for segment1 to finish for user Range 127 - 127
+2020/07/03 14:58:32 Starting U127 for duration 60
+2020/07/03 14:58:32 Done U18
+2020/07/03 14:58:32 Done U47
+2020/07/03 14:58:32 Done U88
+2020/07/03 14:58:32 Done U12
+2020/07/03 14:58:32 Done U14
+2020/07/03 14:58:32 Done U7
+2020/07/03 14:58:32 Done U4
+2020/07/03 14:58:32 Done U95
+2020/07/03 14:58:32 Done U92
+2020/07/03 14:58:32 Done U89
+2020/07/03 14:58:32 Done U40
+2020/07/03 14:58:33 Done U15
+2020/07/03 14:58:33 Done U41
+2020/07/03 14:58:33 Done U96
+2020/07/03 14:58:33 Done U52
+2020/07/03 14:58:33 Done U23
+2020/07/03 14:58:33 Done U77
+2020/07/03 14:58:33 Done U53
+2020/07/03 14:58:33 Done U19
+2020/07/03 14:58:34 Getting User 129 to the system with Segment segment1
+2020/07/03 14:58:34 Main: Operating on segment1 with User Range 129 - 129
+2020/07/03 14:58:34 Main: Waiting for segment1 to finish for user Range 129 - 129
+2020/07/03 14:58:34 Starting U129 for duration 60
+2020/07/03 14:58:34 Done U16
+2020/07/03 14:58:34 Done U29
+2020/07/03 14:58:34 Done U67
+2020/07/03 14:58:34 Done U17
+2020/07/03 14:58:34 Done U71
+2020/07/03 14:58:34 Done U62
+2020/07/03 14:58:34 Done U55
+2020/07/03 14:58:34 Done U93
+2020/07/03 14:58:35 Done U22
+2020/07/03 14:58:35 Getting User 130 to the system with Segment segment1
+2020/07/03 14:58:35 Main: Operating on segment1 with User Range 130 - 130
+2020/07/03 14:58:35 Main: Waiting for segment1 to finish for user Range 130 - 130
+2020/07/03 14:58:35 Starting U130 for duration 60
+2020/07/03 14:58:35 Done U68
+2020/07/03 14:58:35 Done U66
+2020/07/03 14:58:35 Done U44
+2020/07/03 14:58:35 Done U38
+2020/07/03 14:58:35 Done U86
+2020/07/03 14:58:35 Done U75
+2020/07/03 14:58:35 Done U74
+2020/07/03 14:58:36 Getting User 131 to the system with Segment segment1
+2020/07/03 14:58:36 Done U10
+2020/07/03 14:58:36 Done U39
+2020/07/03 14:58:36 Main: Operating on segment1 with User Range 131 - 131
+2020/07/03 14:58:36 Main: Waiting for segment1 to finish for user Range 131 - 131
+2020/07/03 14:58:36 Done U8
+2020/07/03 14:58:36 Starting U131 for duration 60
+2020/07/03 14:58:36 Done U32
+2020/07/03 14:58:36 Done U79
+2020/07/03 14:58:36 Done U46
+2020/07/03 14:58:36 Done U37
+2020/07/03 14:58:36 Done U51
+2020/07/03 14:58:36 Done U78
+2020/07/03 14:58:36 Done U26
+2020/07/03 14:58:37 Getting User 132 to the system with Segment segment1
+2020/07/03 14:58:37 Done U3
+2020/07/03 14:58:37 Main: Operating on segment1 with User Range 132 - 132
+2020/07/03 14:58:37 Main: Waiting for segment1 to finish for user Range 132 - 132
+2020/07/03 14:58:37 Done U81
+2020/07/03 14:58:37 Done U36
+2020/07/03 14:58:37 Done U24
+2020/07/03 14:58:37 Starting U132 for duration 60
+2020/07/03 14:58:37 Done U84
+2020/07/03 14:58:37 Done U104
+2020/07/03 14:58:37 Main: segment1 Completed for user Range 104 - 104
+2020/07/03 14:58:37 Done U1
+2020/07/03 14:58:37 Done U98
+2020/07/03 14:58:38 Done U34
+2020/07/03 14:58:38 Done U13
+2020/07/03 14:58:38 Done U11
+2020/07/03 14:58:38 Done U2
+2020/07/03 14:58:38 Done U27
+2020/07/03 14:58:38 Done U85
+2020/07/03 14:58:38 Done U50
+2020/07/03 14:58:39 Done U30
+2020/07/03 14:58:39 Getting User 134 to the system with Segment segment1
+2020/07/03 14:58:39 Main: Operating on segment1 with User Range 134 - 134
+2020/07/03 14:58:39 Main: Waiting for segment1 to finish for user Range 134 - 134
+2020/07/03 14:58:39 Done U31
+2020/07/03 14:58:39 Done U48
+2020/07/03 14:58:39 Done U35
+2020/07/03 14:58:39 Starting U134 for duration 60
+2020/07/03 14:58:39 Done U5
+2020/07/03 14:58:39 Done U61
+2020/07/03 14:58:39 Done U82
+2020/07/03 14:58:39 Done U76
+2020/07/03 14:58:39 Done U99
+2020/07/03 14:58:40 Getting User 135 to the system with Segment segment1
+2020/07/03 14:58:40 Main: Operating on segment1 with User Range 135 - 135
+2020/07/03 14:58:40 Main: Waiting for segment1 to finish for user Range 135 - 135
+2020/07/03 14:58:40 Starting U135 for duration 60
+2020/07/03 14:58:40 Done U45
+2020/07/03 14:58:40 Done U54
+2020/07/03 14:58:41 Done U69
+2020/07/03 14:58:41 Done U33
+2020/07/03 14:58:41 Done U28
+2020/07/03 14:58:41 Done U72
+2020/07/03 14:58:41 Done U25
+2020/07/03 14:58:41 Done U80
+2020/07/03 14:58:41 Done U64
+2020/07/03 14:58:42 Getting User 137 to the system with Segment segment1
+2020/07/03 14:58:42 Main: Operating on segment1 with User Range 137 - 137
+2020/07/03 14:58:42 Main: Waiting for segment1 to finish for user Range 137 - 137
+2020/07/03 14:58:42 Done U63
+2020/07/03 14:58:42 Starting U137 for duration 60
+2020/07/03 14:58:42 Done U97
+2020/07/03 14:58:42 Done U57
+2020/07/03 14:58:43 Done U6
+2020/07/03 14:58:43 Done U70
+2020/07/03 14:58:45 Getting User 140 to the system with Segment segment1
+2020/07/03 14:58:45 Main: Operating on segment1 with User Range 140 - 140
+2020/07/03 14:58:45 Main: Waiting for segment1 to finish for user Range 140 - 140
+2020/07/03 14:58:45 Starting U140 for duration 60
+2020/07/03 14:58:45 Done U65
+2020/07/03 14:58:45 Main: segment1 Completed for user Range 1 - 100
+2020/07/03 14:58:47 Done U114
+2020/07/03 14:58:47 Done U108
+2020/07/03 14:58:47 Main: segment1 Completed for user Range 108 - 108
+2020/07/03 14:58:47 Main: segment1 Completed for user Range 114 - 114
+2020/07/03 14:58:47 Done U105
+2020/07/03 14:58:47 Main: segment1 Completed for user Range 105 - 105
+2020/07/03 14:58:49 Done U112
+2020/07/03 14:58:49 Main: segment1 Completed for user Range 112 - 112
+2020/07/03 14:58:50 Getting User 145 to the system with Segment segment1
+2020/07/03 14:58:50 All Segments - Done !!!
+2020/07/03 14:58:50 Main: Operating on segment1 with User Range 145 - 145
+2020/07/03 14:58:50 Main: Waiting for segment1 to finish for user Range 145 - 145
+2020/07/03 14:58:50 Starting U145 for duration 60
+2020/07/03 14:58:50 Done U113
+2020/07/03 14:58:50 Done U119
+2020/07/03 14:58:50 Main: segment1 Completed for user Range 113 - 113
+2020/07/03 14:58:50 Main: segment1 Completed for user Range 119 - 119
+2020/07/03 14:58:51 Done U125
+2020/07/03 14:58:51 Main: segment1 Completed for user Range 125 - 125
+2020/07/03 14:58:51 Done U120
+2020/07/03 14:58:51 Main: segment1 Completed for user Range 120 - 120
+2020/07/03 14:58:53 Done U117
+2020/07/03 14:58:53 Main: segment1 Completed for user Range 117 - 117
+2020/07/03 14:59:00 Done U127
+2020/07/03 14:59:00 Done U124
+2020/07/03 14:59:00 Main: segment1 Completed for user Range 124 - 124
+2020/07/03 14:59:00 Main: segment1 Completed for user Range 127 - 127
+2020/07/03 14:59:03 Done U130
+2020/07/03 14:59:03 Main: segment1 Completed for user Range 130 - 130
+2020/07/03 14:59:07 Done U131
+2020/07/03 14:59:07 Main: segment1 Completed for user Range 131 - 131
+2020/07/03 14:59:08 Done U132
+2020/07/03 14:59:08 Main: segment1 Completed for user Range 132 - 132
+2020/07/03 14:59:08 Done U134
+2020/07/03 14:59:08 Main: segment1 Completed for user Range 134 - 134
+2020/07/03 14:59:08 Done U129
+2020/07/03 14:59:08 Main: segment1 Completed for user Range 129 - 129
+2020/07/03 14:59:12 Done U137
+2020/07/03 14:59:12 Main: segment1 Completed for user Range 137 - 137
+2020/07/03 14:59:16 Done U135
+2020/07/03 14:59:16 Main: segment1 Completed for user Range 135 - 135
+2020/07/03 14:59:18 Done U140
+2020/07/03 14:59:18 Main: segment1 Completed for user Range 140 - 140
+2020/07/03 14:59:21 Done U145
+2020/07/03 14:59:21 Main: segment1 Completed for user Range 145 - 145
+2020/07/03 14:59:21 New Users - Done !!!
+2020/07/03 14:59:21 Main - Done !!!

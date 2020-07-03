@@ -1,5 +1,9 @@
 package config
 
+/*
+Input object corresponding to YAML config
+*/
+
 import(
     "time"
 )

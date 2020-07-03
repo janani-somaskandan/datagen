@@ -1,5 +1,9 @@
 package utils
 
+/*
+Util for array operations
+*/
+
 import(
 	"math"
 )
