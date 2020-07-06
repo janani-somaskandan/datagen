@@ -2,6 +2,9 @@ package operations
 
 import(
 	"testing"
+	"../utils"
+	"../config"
+	"time"
 )
 
 func TestComputeRangeMap(t *testing.T){
@@ -63,5 +66,157 @@ func TestComputeRangeMap(t *testing.T){
 				t.Errorf("Expected: 10 Result: %v", dataRange)
 			}
 		}
+	}
+}
+
+func TestGetRandomEventWithCorrelation(t *testing.T){
+	lastKnownGoodState := "E1"
+	seedEvents := []string{"E1"}
+	var probMap SegmentProbMap
+	probMap.EventCorrelationMultiplier = make(map[string]int)
+	probMap.EventCorrelationMultiplier["E1"] = 10
+	probMap.EventCorrelationMultiplier["E2"] = 10
+	probMap.EventCorrelationMultiplier["E3"] = 10
+	probMap.EventCorrelationRangeMap = make(map[string]utils.RangeMap)
+	probRangeMapE1 := utils.RangeMap{}
+	probRangeMapE1.Keys = []utils.Range{utils.Range{0,3}, utils.Range{4,9}}
+	probRangeMapE1.Values = []string{"E2", "E3"}
+	probMap.EventCorrelationRangeMap["E1"] = probRangeMapE1
+	probRangeMapE2 := utils.RangeMap{}
+	probRangeMapE2.Keys = []utils.Range{utils.Range{0,9}}
+	probRangeMapE2.Values = []string{"E3"}
+	probMap.EventCorrelationRangeMap["E2"] = probRangeMapE2
+	probRangeMapE3 := utils.RangeMap{}
+	probRangeMapE3.Keys = []utils.Range{utils.Range{0,1},utils.Range{1,9}}
+	probRangeMapE3.Values = []string{"E3","E1"}
+	probMap.EventCorrelationRangeMap["E3"] = probRangeMapE3
+	
+	result1 := GetRandomEventWithCorrelation(&lastKnownGoodState, seedEvents, probMap)
+	if(!(result1 == "E2" || result1 == "E3")){
+		t.Errorf("Expected: E2 || E3 Result: %v", result1)
+	}
+	if(!(lastKnownGoodState == "E2" || lastKnownGoodState == "E3")){
+		t.Errorf("Expected: E2 || E3 Result: %v", lastKnownGoodState)
+	}
+	if(!(result1 == lastKnownGoodState)){
+		t.Errorf("Expected to have same result and lastKnownGoodState")
+	}
+
+	lastKnownGoodState = ""
+	result2 := GetRandomEventWithCorrelation(&lastKnownGoodState, seedEvents, probMap)
+	if(!(result2 == lastKnownGoodState)){
+		t.Errorf("Expected to have same result and lastKnownGoodState")
+	}
+	if(!(result2 == "E1")){
+		t.Errorf("Expected: E1 Result: %v", result2)
+	}
+
+	lastKnownGoodState = "E2"
+	result3 := GetRandomEventWithCorrelation(&lastKnownGoodState, seedEvents, probMap)
+	if(!(result3 == lastKnownGoodState)){
+		t.Errorf("Expected to have same result and lastKnownGoodState")
+	}
+	if(!(result3 == "E3")){
+		t.Errorf("Expected: E3 Result: %v", result2)
+	}
+}
+
+func TestGetRandomEvent(t *testing.T){
+	var probMap SegmentProbMap
+	probMap.eventMultiplier = 10
+	eventsRangeMap := utils.RangeMap{}
+	eventsRangeMap.Keys = []utils.Range{utils.Range{0,3}, utils.Range{4,9}}
+	eventsRangeMap.Values = []string{"E4", "E5"}
+	probMap.eventProbRangeMap = eventsRangeMap
+
+	result1 := GetRandomEvent(probMap)
+	if(!(result1 == "E4" || result1 == "E5")){
+		t.Errorf("Expected: E4 || E5 Result: %v", result1)
+	}
+}
+
+func TestGetRandomActivity(t *testing.T){
+	var probMap SegmentProbMap
+	probMap.activityMultiplier = 10
+	activityRangeMap := utils.RangeMap{}
+	activityRangeMap.Keys = []utils.Range{utils.Range{0,3}, utils.Range{4,9}}
+	activityRangeMap.Values = []string{"A1", "A2"}
+	probMap.activityProbRangeMap = activityRangeMap
+
+	result1 := GetRandomActivity(probMap)
+	if(!(result1 == "A1" || result1 == "A2")){
+		t.Errorf("Expected: A1 || A2 Result: %v", result1)
+	}
+}
+
+func TestSetEventAttributes(t *testing.T){
+	var userSegment config.UserSegmentV2
+	userSegment.Set_attributes = true
+	userSegment.Event_attributes = make(map[string]map[string]string)
+	attributes := make(map[string]string)
+	attributes["Category"] = "C1"
+	attributes["Type"] = "T1"
+	userSegment.Event_attributes["E1"] = attributes
+
+	result1 := SetEventAttributes(userSegment,"E1")
+	if(result1 == nil){
+		t.Errorf("Expected: NotNull Result: %v", result1)
+	}
+
+	result2 := SetEventAttributes(userSegment,"E2")
+	if(!(result2 == nil)){
+		t.Errorf("Expected: Null Result: %v", result2)
+	}
+
+	userSegment.Set_attributes = false
+	result3 := SetEventAttributes(userSegment,"E1")
+	if(!(result3 == nil)){
+		t.Errorf("Expected: Null Result: %v", result3)
+	}
+}
+
+func TestSetUserAttributes(t *testing.T){
+	var userSegment config.UserSegmentV2
+	userSegment.Set_attributes = true
+	userSegment.User_attributes = make(map[string]map[string]string)
+	attributes := make(map[string]string)
+	attributes["Gender"] = "Male"
+	attributes["Age"] = "18-25"
+	userSegment.User_attributes["U1"] = attributes
+
+	result1 := SetUserAttributes(userSegment,"U1")
+	if(result1 == nil){
+		t.Errorf("Expected: NotNull Result: %v", result1)
+	}
+
+	result2 := SetUserAttributes(userSegment,"U2")
+	if(!(result2 == nil)){
+		t.Errorf("Expected: Null Result: %v", result2)
+	}
+
+	userSegment.Set_attributes = false
+	result3 := SetUserAttributes(userSegment,"U1")
+	if(!(result3 == nil)){
+		t.Errorf("Expected: Null Result: %v", result3)
+	}
+}
+
+func TestFormatOutput(t *testing.T){
+	var userSegment config.UserSegmentV2
+	userSegment.Activity_ticker_in_seconds = 1
+	userSegment.Start_Time = time.Date(
+		2009, 11, 17, 20, 34, 58, 651387237, time.UTC) 
+	result1 := FormatOutput(userSegment, "U1", "E1", 1, nil, nil)
+	output1 := "{\"user_id\":\"U1\",\"event_name\":\"E1\",\"timestamp\":1258490099,\"user_properties\":null,\"event_properties\":null}"
+	if(result1 != output1){
+		t.Errorf("Expected %v Result %v", output1, result1)
+	}
+
+	attr := make(map[string]string)
+	attr["A1"] = "U1"
+	result2 := FormatOutput(userSegment, "U1", "E1", 1, attr, attr)
+	output2 := "{\"user_id\":\"U1\",\"event_name\":\"E1\",\"timestamp\":1258490099,\"user_properties\":{\"A1\":\"U1\"},\"event_properties\":{\"A1\":\"U1\"}}"
+	if(result2 != output2){
+		t.Errorf("Expected %v Result %v", output2, result2)
 	}
 }

@@ -251,6 +251,7 @@ func IsRealTime() bool {
 	}
 	return false
 }
+
 func SetUserAttributes(segmentConfig config.UserSegmentV2, userId string) map[string]string{
 	var userAttributes map[string]string
 	if(segmentConfig.Set_attributes == true){
