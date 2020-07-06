@@ -11,6 +11,7 @@ import(
 	"sync"
 	"reflect"
 	"encoding/json"
+	"math"
 	Log "../utils/Log"
 )
 
@@ -169,9 +170,11 @@ func PreComputeRangeMap(segment config.UserSegmentV2) (SegmentProbMap) {
 
 	events := make(map[string]float64)
 	sum := 0.0
-	for item, element := range segment.Event_probablity_map.Independent_events {
-		sum += element
-		events[item] = element
+	if segment.Event_probablity_map.Independent_events != nil {
+		for item, element := range segment.Event_probablity_map.Independent_events {
+			sum += element
+			events[item] = element
+		}
 	}
 
 	events["EventCorrelation"] = (1.0 - sum)
@@ -208,6 +211,9 @@ func GenerateEvents(wg *sync.WaitGroup, segmentConfig config.UserSegmentV2, acti
 			registration.WriterInstance.Write(op)
 			WaitIfRealTime(segmentConfig.Activity_ticker_in_seconds)
 			
+		}
+		if(activity == "Exit"){
+			Log.Debug.Printf("Exit %s", userId)
 		}	
 	}
 	Log.Debug.Printf("Done %s", userId)
@@ -323,9 +329,10 @@ func ComputeRangeMap(probMap map[string]float64) (utils.RangeMap, int) {
 	start := 0
 	probRangeMap := utils.RangeMap{}
 	for item,element := range probMap {
-		probRangeMap.Keys = append(probRangeMap.Keys,utils.Range{ start, start+int(element * multiplier)-1 })
+		rangeEnd := int(math.Round(element * multiplier))
+		probRangeMap.Keys = append(probRangeMap.Keys,utils.Range{ start, start+rangeEnd-1 })
 		probRangeMap.Values = append(probRangeMap.Values, item)
-		start = start + int(element * multiplier)
+		start = start + rangeEnd
 	}
 
 	return probRangeMap, int(multiplier)
