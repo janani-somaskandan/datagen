@@ -1,5 +1,9 @@
 package Log
 
+/*
+Log registration for debug and error logs
+*/
+
 import(
 	"os"
 	"fmt"
