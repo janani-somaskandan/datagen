@@ -37,4 +37,5 @@ type ConfigurationV2 struct {
     User_segments map[string]UserSegmentV2
     New_user_poll_time int
     New_user_probablity float64
+    Per_tick_new_user_seed_count int
 }

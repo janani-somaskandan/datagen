@@ -53,7 +53,14 @@ func OperateV2(){
 	for item,element := range config.ConfigV2.User_segments {
 		segmentWg.Add(1)
 		segmentStatus[item] = false
-		go OperateOnSegment(&segmentWg, item, element, probMap.segmentProbMap[item], userIndex[item], userIndex[item] + element.Number_of_users -1, segmentStatus)
+		go OperateOnSegment(
+			&segmentWg, 
+			item, 
+			element, 
+			probMap.segmentProbMap[item], 
+			userIndex[item], 
+			userIndex[item] + element.Number_of_users -1, 
+			segmentStatus)
 	}
 
 	Log.Debug.Printf("Main: Waiting for All Segments to finish")
@@ -63,7 +70,8 @@ func OperateV2(){
 	newUserSegmentStatus := make(map[string]bool)
 	
 	// Seeding new users based on the seed probablity till the pre-defined segments executes
-	for i := userCounter; allSegmentsDone == false && IsRealTime() == true; i++ {
+	i := userCounter
+	for allSegmentsDone == false && IsRealTime() == true {
 
 		WaitIfRealTime(config.ConfigV2.New_user_poll_time)
 		if(SeedUserOrNot(probMap) == true) {
@@ -71,7 +79,14 @@ func OperateV2(){
 			seg := GetRandomSegment()
 			Log.Debug.Printf("Getting User %v to the system with Segment %s", i , seg)
 			newUserWg.Add(1)
-			go OperateOnSegment(&newUserWg,seg,config.ConfigV2.User_segments[seg],probMap.segmentProbMap[seg],i,i,newUserSegmentStatus)
+			go OperateOnSegment(
+				&newUserWg,
+				seg,config.ConfigV2.User_segments[seg],
+				probMap.segmentProbMap[seg],
+				i,
+				i+config.ConfigV2.Per_tick_new_user_seed_count-1,
+				newUserSegmentStatus)
+			i = i + config.ConfigV2.Per_tick_new_user_seed_count
 			allSegmentsDone = IsAllSegmentsDone(segmentStatus)
 				
 		}
@@ -113,6 +128,7 @@ func SeedUserOrNot(probMap ProbMap)bool{
 	if(state == false){
 		Log.Error.Fatal(fmt.Sprintf("NewUserRangeMap: Key not found %v", r))
 	}
+	Log.Debug.Printf("Seed New User - %s", newUserInsert)
 	if(newUserInsert == "Insert") {
 		return true
 	}
@@ -202,7 +218,10 @@ func GenerateEvents(wg *sync.WaitGroup, segmentConfig config.UserSegmentV2, acti
 			event := GetRandomEvent(probMap)
 
 			if event == "EventCorrelation" {
-				event = GetRandomEventWithCorrelation(&lastKnownGoodState, segmentConfig.Event_probablity_map.Correlation_matrix.Seed_events, probMap)
+				event = GetRandomEventWithCorrelation(
+					&lastKnownGoodState, 
+					segmentConfig.Event_probablity_map.Correlation_matrix.Seed_events, 
+					probMap)
 			}
 			eventAttributes := SetEventAttributes(segmentConfig, event)
 
