@@ -44,7 +44,7 @@ func OperateV2(){
 	for item, element := range config.ConfigV2.User_segments {
 		probMap.segmentProbMap[item] = PreComputeRangeMap(element)
 	}
-	probMap.newUserRangeMap, probMap.newUserMultiplier = CreateNewUserProbMap()
+	probMap.newUserProbMap = CreateNewUserProbMap()
 	Log.Debug.Printf("RangeMaps %v", probMap)
 
 	// Generate events per USER SEGMENT
@@ -83,22 +83,23 @@ func OperateV2(){
 	Log.Debug.Printf("Main - Done !!!")
 }
 
+type RangeMapMultiplierTuple struct {
+	probRangeMap utils.RangeMap
+	multiplier int
+}
+
 type SegmentProbMap struct {
-	EventCorrelationRangeMap map[string]utils.RangeMap
-	EventCorrelationMultiplier map[string]int
-	eventProbRangeMap utils.RangeMap
-	eventMultiplier int
-	activityProbRangeMap utils.RangeMap
-	activityMultiplier int
+	EventCorrelationProbMap map[string]RangeMapMultiplierTuple
+	eventProbMap RangeMapMultiplierTuple
+	activityProbMap RangeMapMultiplierTuple
 }
 
 type ProbMap struct {
-	newUserRangeMap utils.RangeMap
-	newUserMultiplier int
+	newUserProbMap RangeMapMultiplierTuple
 	segmentProbMap map[string]SegmentProbMap
 }
 
-func CreateNewUserProbMap()(utils.RangeMap, int){
+func CreateNewUserProbMap()(RangeMapMultiplierTuple){
 	
 	newUserProbablityMap := make(map[string]float64)
 	newUserProbablityMap["Insert"] = config.ConfigV2.New_user_probablity
@@ -107,8 +108,8 @@ func CreateNewUserProbMap()(utils.RangeMap, int){
 }
 
 func SeedUserOrNot(probMap ProbMap)bool{
-	r := rand.Intn(probMap.newUserMultiplier)
-	newUserInsert, state := probMap.newUserRangeMap.Get(r)
+	r := rand.Intn(probMap.newUserProbMap.multiplier)
+	newUserInsert, state := probMap.newUserProbMap.probRangeMap.Get(r)
 	if(state == false){
 		Log.Error.Fatal(fmt.Sprintf("NewUserRangeMap: Key not found %v", r))
 	}
@@ -162,10 +163,9 @@ func OperateOnSegment(segmentWg *sync.WaitGroup, segmentName string, segment con
 func PreComputeRangeMap(segment config.UserSegmentV2) (SegmentProbMap) {
 
 	var probMap SegmentProbMap
-	probMap.EventCorrelationRangeMap = make(map[string]utils.RangeMap)
-	probMap.EventCorrelationMultiplier = make(map[string]int)
+	probMap.EventCorrelationProbMap = make(map[string]RangeMapMultiplierTuple)
 	for item, element := range segment.Event_probablity_map.Correlation_matrix.Events {
-		probMap.EventCorrelationRangeMap[item], probMap.EventCorrelationMultiplier[item] = ComputeRangeMap(element)
+		probMap.EventCorrelationProbMap[item] = ComputeRangeMap(element)
 	}
 
 	events := make(map[string]float64)
@@ -178,8 +178,8 @@ func PreComputeRangeMap(segment config.UserSegmentV2) (SegmentProbMap) {
 	}
 
 	events["EventCorrelation"] = (1.0 - sum)
-	probMap.eventProbRangeMap, probMap.eventMultiplier = ComputeRangeMap(events)
-	probMap.activityProbRangeMap, probMap.activityMultiplier = ComputeRangeMap(segment.Activity_probablity_map)
+	probMap.eventProbMap = ComputeRangeMap(events)
+	probMap.activityProbMap = ComputeRangeMap(segment.Activity_probablity_map)
 
 	return probMap
 }
@@ -275,8 +275,8 @@ func SetEventAttributes(segmentConfig config.UserSegmentV2,eventName string) map
 }
 
 func GetRandomActivity(probMap SegmentProbMap) string {
-	activity := rand.Intn(probMap.activityMultiplier)
-	activityName, state := probMap.activityProbRangeMap.Get(activity)
+	activity := rand.Intn(probMap.activityProbMap.multiplier)
+	activityName, state := probMap.activityProbMap.probRangeMap.Get(activity)
 	if(state == false){
 		Log.Error.Fatal(fmt.Sprintf("ActivityProbablityRangeMap: Key not found %v", activity))
 	}
@@ -284,8 +284,8 @@ func GetRandomActivity(probMap SegmentProbMap) string {
 }
 
 func GetRandomEvent(probMap SegmentProbMap) string {
-	event := rand.Intn(probMap.eventMultiplier)
-	eventName, state := probMap.eventProbRangeMap.Get(event)
+	event := rand.Intn(probMap.eventProbMap.multiplier)
+	eventName, state := probMap.eventProbMap.probRangeMap.Get(event)
 	if(state == false){
 		Log.Error.Fatal(fmt.Sprintf("EventProbablityRangeMap: Key not found %v", event))
 	}
@@ -298,8 +298,8 @@ func GetRandomEventWithCorrelation(lastKnownGoodState *string, seedEvents []stri
 		return *lastKnownGoodState
 	}
     
-	event := rand.Intn(probMap.EventCorrelationMultiplier[*lastKnownGoodState])
-	eventName, state := probMap.EventCorrelationRangeMap[*lastKnownGoodState].Get(event)
+	event := rand.Intn(probMap.EventCorrelationProbMap[*lastKnownGoodState].multiplier)
+	eventName, state := probMap.EventCorrelationProbMap[*lastKnownGoodState].probRangeMap.Get(event)
 	if(state == false){
 		Log.Error.Fatal(fmt.Sprintf("EventProbablityRangeMapWithCorrelation: Key not found %v", event))
 	}
@@ -307,7 +307,7 @@ func GetRandomEventWithCorrelation(lastKnownGoodState *string, seedEvents []stri
 	return eventName
 }
 
-func ComputeRangeMap(probMap map[string]float64) (utils.RangeMap, int) {
+func ComputeRangeMap(probMap map[string]float64) (RangeMapMultiplierTuple) {
 
 	// Assuming sum of the probablities of elements is 1
 	// TODO janani: yet to calculate relative probablities if the sum is not 1
@@ -336,5 +336,5 @@ func ComputeRangeMap(probMap map[string]float64) (utils.RangeMap, int) {
 		start = start + rangeEnd
 	}
 
-	return probRangeMap, int(multiplier)
+	return RangeMapMultiplierTuple{ probRangeMap, int(multiplier)}
 }

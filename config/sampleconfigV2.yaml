@@ -2,14 +2,14 @@
 # will be the total probablity of correlated events
 ---
 output_file_name: test1.log
-activity_time_in_seconds: 300
+activity_time_in_seconds: 60
 real_time: true
 user_id_prefix: U
 new_user_poll_time: 1
 new_user_probablity: 0.5
 user_segments: 
   segment1:
-    number_of_users: 100
+    number_of_users: 1
     activity_ticker_in_seconds: 1
     activity_probablity_map:
       DoSomething: 0.5

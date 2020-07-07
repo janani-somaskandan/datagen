@@ -17,51 +17,51 @@ func TestComputeRangeMap(t *testing.T){
 	probMap["E6"]= 0.06
 	probMap["E7"]= 0.029
 	probMap["E8"]= 0.001
-	resultRangeMap, resultMultiplier  := ComputeRangeMap(probMap)
-	if(resultMultiplier != 10000){
-		t.Errorf("Expected: 10000 Result: %v", resultMultiplier)
+	result  := ComputeRangeMap(probMap)
+	if(result.multiplier != 10000){
+		t.Errorf("Expected: 10000 Result: %v", result.multiplier)
 	}
-	if(len(resultRangeMap.Keys) != 8){
-		t.Errorf("Expected: 8 Result: %v", len(resultRangeMap.Keys))
+	if(len(result.probRangeMap.Keys) != 8){
+		t.Errorf("Expected: 8 Result: %v", len(result.probRangeMap.Keys))
 	}
-	for i := 0; i < len(resultRangeMap.Keys); i++ {
-		dataRange := resultRangeMap.Keys[i].U - resultRangeMap.Keys[i].L + 1
-		if(resultRangeMap.Values[i] == "E1"){
+	for i := 0; i < len(result.probRangeMap.Keys); i++ {
+		dataRange := result.probRangeMap.Keys[i].U - result.probRangeMap.Keys[i].L + 1
+		if(result.probRangeMap.Values[i] == "E1"){
 			if(dataRange != 1){
 				t.Errorf("Expected: 1 Result: %v", dataRange)
 			}
 		}
-		if(resultRangeMap.Values[i] == "E2"){
+		if(result.probRangeMap.Values[i] == "E2"){
 			if(dataRange != 5000){
 				t.Errorf("Expected: 5000 Result: %v", dataRange)
 			}
 		}
-		if(resultRangeMap.Values[i] == "E3"){
+		if(result.probRangeMap.Values[i] == "E3"){
 			if(dataRange != 4000){
 				t.Errorf("Expected: 4000 Result: %v", dataRange)
 			}
 		}
-		if(resultRangeMap.Values[i] == "E4"){
+		if(result.probRangeMap.Values[i] == "E4"){
 			if(dataRange != 9){
 				t.Errorf("Expected: 9 Result: %v", dataRange)
 			}
 		}
-		if(resultRangeMap.Values[i] == "E5"){
+		if(result.probRangeMap.Values[i] == "E5"){
 			if(dataRange != 90){
 				t.Errorf("Expected: 90 Result: %v", dataRange)
 			}
 		}
-		if(resultRangeMap.Values[i] == "E6"){
+		if(result.probRangeMap.Values[i] == "E6"){
 			if(dataRange != 600){
 				t.Errorf("Expected: 600 Result: %v", dataRange)
 			}
 		}
-		if(resultRangeMap.Values[i] == "E7"){
+		if(result.probRangeMap.Values[i] == "E7"){
 			if(dataRange != 290){
 				t.Errorf("Expected: 290 Result: %v", dataRange)
 			}
 		}
-		if(resultRangeMap.Values[i] == "E8"){
+		if(result.probRangeMap.Values[i] == "E8"){
 			if(dataRange != 10){
 				t.Errorf("Expected: 10 Result: %v", dataRange)
 			}
@@ -73,23 +73,19 @@ func TestGetRandomEventWithCorrelation(t *testing.T){
 	lastKnownGoodState := "E1"
 	seedEvents := []string{"E1"}
 	var probMap SegmentProbMap
-	probMap.EventCorrelationMultiplier = make(map[string]int)
-	probMap.EventCorrelationMultiplier["E1"] = 10
-	probMap.EventCorrelationMultiplier["E2"] = 10
-	probMap.EventCorrelationMultiplier["E3"] = 10
-	probMap.EventCorrelationRangeMap = make(map[string]utils.RangeMap)
+	probMap.EventCorrelationProbMap = make(map[string]RangeMapMultiplierTuple)
 	probRangeMapE1 := utils.RangeMap{}
 	probRangeMapE1.Keys = []utils.Range{utils.Range{0,3}, utils.Range{4,9}}
 	probRangeMapE1.Values = []string{"E2", "E3"}
-	probMap.EventCorrelationRangeMap["E1"] = probRangeMapE1
+	probMap.EventCorrelationProbMap["E1"] = RangeMapMultiplierTuple {probRangeMapE1, 10}
 	probRangeMapE2 := utils.RangeMap{}
 	probRangeMapE2.Keys = []utils.Range{utils.Range{0,9}}
 	probRangeMapE2.Values = []string{"E3"}
-	probMap.EventCorrelationRangeMap["E2"] = probRangeMapE2
+	probMap.EventCorrelationProbMap["E2"] = RangeMapMultiplierTuple{probRangeMapE2, 10}
 	probRangeMapE3 := utils.RangeMap{}
 	probRangeMapE3.Keys = []utils.Range{utils.Range{0,1},utils.Range{1,9}}
 	probRangeMapE3.Values = []string{"E3","E1"}
-	probMap.EventCorrelationRangeMap["E3"] = probRangeMapE3
+	probMap.EventCorrelationProbMap["E3"] = RangeMapMultiplierTuple{probRangeMapE2, 10}
 	
 	result1 := GetRandomEventWithCorrelation(&lastKnownGoodState, seedEvents, probMap)
 	if(!(result1 == "E2" || result1 == "E3")){
@@ -123,11 +119,10 @@ func TestGetRandomEventWithCorrelation(t *testing.T){
 
 func TestGetRandomEvent(t *testing.T){
 	var probMap SegmentProbMap
-	probMap.eventMultiplier = 10
 	eventsRangeMap := utils.RangeMap{}
 	eventsRangeMap.Keys = []utils.Range{utils.Range{0,3}, utils.Range{4,9}}
 	eventsRangeMap.Values = []string{"E4", "E5"}
-	probMap.eventProbRangeMap = eventsRangeMap
+	probMap.eventProbMap = RangeMapMultiplierTuple{ eventsRangeMap, 10}
 
 	result1 := GetRandomEvent(probMap)
 	if(!(result1 == "E4" || result1 == "E5")){
@@ -137,11 +132,10 @@ func TestGetRandomEvent(t *testing.T){
 
 func TestGetRandomActivity(t *testing.T){
 	var probMap SegmentProbMap
-	probMap.activityMultiplier = 10
 	activityRangeMap := utils.RangeMap{}
 	activityRangeMap.Keys = []utils.Range{utils.Range{0,3}, utils.Range{4,9}}
 	activityRangeMap.Values = []string{"A1", "A2"}
-	probMap.activityProbRangeMap = activityRangeMap
+	probMap.activityProbMap = RangeMapMultiplierTuple {activityRangeMap ,10 }
 
 	result1 := GetRandomActivity(probMap)
 	if(!(result1 == "A1" || result1 == "A2")){
@@ -253,19 +247,19 @@ func TestGetRandomSegment(t *testing.T){
 
 func TestCreateNewUserProbMap(t *testing.T){
 	config.ConfigV2.New_user_probablity = 0.2
-	resultMap, resultMultiplier := CreateNewUserProbMap()
-	if(resultMultiplier != 10){
-		t.Errorf("Expected 10. Result %v", resultMultiplier)
+	result := CreateNewUserProbMap()
+	if(result.multiplier != 10){
+		t.Errorf("Expected 10. Result %v", result.multiplier)
 	}
-	for item,element := range resultMap.Values {
+	for item,element := range result.probRangeMap.Values {
 		if( element == "Insert"){
-			if(resultMap.Keys[item].U-resultMap.Keys[item].L+1 != 2){
-				t.Errorf("Expected 2. Result %v", (resultMap.Keys[item].U-resultMap.Keys[item].L+1))
+			if(result.probRangeMap.Keys[item].U-result.probRangeMap.Keys[item].L+1 != 2){
+				t.Errorf("Expected 2. Result %v", (result.probRangeMap.Keys[item].U-result.probRangeMap.Keys[item].L+1))
 			}
 		}
 		if( element == "NoInsert"){
-			if(resultMap.Keys[item].U-resultMap.Keys[item].L+1 != 8){
-				t.Errorf("Expected 8. Result %v", (resultMap.Keys[item].U-resultMap.Keys[item].L+1))
+			if(result.probRangeMap.Keys[item].U-result.probRangeMap.Keys[item].L+1 != 8){
+				t.Errorf("Expected 8. Result %v", (result.probRangeMap.Keys[item].U-result.probRangeMap	.Keys[item].L+1))
 			}
 		}
 	}
