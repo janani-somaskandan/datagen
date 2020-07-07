@@ -220,3 +220,53 @@ func TestFormatOutput(t *testing.T){
 		t.Errorf("Expected %v Result %v", output2, result2)
 	}
 }
+
+func TestIsAllSegmentsDone(t *testing.T){
+	segmentStatus := make(map[string]bool)
+	segmentStatus["E1"] = true
+	segmentStatus["E2"] = false
+	segmentStatus["E3"] = true
+	result1 := IsAllSegmentsDone(segmentStatus)
+	if(result1 == true){
+		t.Errorf("Expected false. Result %v",result1)
+	}
+	segmentStatus["E2"] = true
+	result2 := IsAllSegmentsDone(segmentStatus)
+	if(result2 == false){
+		t.Errorf("Expected true. Result %v",result2)
+	}
+}
+
+func TestGetRandomSegment(t *testing.T){
+	config.ConfigV2.User_segments = make(map[string]config.UserSegmentV2)
+	config.ConfigV2.User_segments["Segment1"] = config.UserSegmentV2{}
+	result1 := GetRandomSegment()
+	if(result1 != "Segment1"){
+		t.Errorf("Expected Segment1. Result %v", result1)
+	}
+	config.ConfigV2.User_segments["Segment2"] = config.UserSegmentV2{}
+	result2 := GetRandomSegment()
+	if(!(result2 == "Segment1" || result2 == "Segment2")){
+		t.Errorf("Expected Segment1 || segment2. Result %v", result2)
+	}
+}
+
+func TestCreateNewUserProbMap(t *testing.T){
+	config.ConfigV2.New_user_probablity = 0.2
+	resultMap, resultMultiplier := CreateNewUserProbMap()
+	if(resultMultiplier != 10){
+		t.Errorf("Expected 10. Result %v", resultMultiplier)
+	}
+	for item,element := range resultMap.Values {
+		if( element == "Insert"){
+			if(resultMap.Keys[item].U-resultMap.Keys[item].L+1 != 2){
+				t.Errorf("Expected 2. Result %v", (resultMap.Keys[item].U-resultMap.Keys[item].L+1))
+			}
+		}
+		if( element == "NoInsert"){
+			if(resultMap.Keys[item].U-resultMap.Keys[item].L+1 != 8){
+				t.Errorf("Expected 8. Result %v", (resultMap.Keys[item].U-resultMap.Keys[item].L+1))
+			}
+		}
+	}
+}
