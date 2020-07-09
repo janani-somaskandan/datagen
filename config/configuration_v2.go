@@ -11,6 +11,7 @@ import(
 type CorrelationMatrix struct {
     Events map[string]map[string]float64
     Seed_events []string
+    Exit_events []string
 }
 
 type EventProbablity struct{

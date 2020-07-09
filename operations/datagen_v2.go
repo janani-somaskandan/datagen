@@ -14,13 +14,13 @@ import(
 	"math"
 	Log "../utils/Log"
 )
-
+var globalTimer bool
 func OperateV2(){
 
 	//Declaring WaitGroup for SegmentLevel and newUser Concurrency
 	var segmentWg sync.WaitGroup
 	var newUserWg sync.WaitGroup
-
+	var globalTimerWg sync.WaitGroup
 	/*Calculating USERNAME indexing across segments
 	Ex: Segment1 has 10 users and Segment2 has 5 users
 	Segment1 will have users named U1,U2...U10 and 
@@ -71,7 +71,10 @@ func OperateV2(){
 	
 	// Seeding new users based on the seed probablity till the pre-defined segments executes
 	i := userCounter
-	for allSegmentsDone == false && IsRealTime() == true {
+	globalTimer = false
+	globalTimerWg.Add(1)
+	go WaitForNSeconds(&globalTimerWg, config.ConfigV2.Activity_time_in_seconds)
+	for (allSegmentsDone == false && IsRealTime() == true) || (IsRealTime() == true && globalTimer == false) {
 
 		WaitIfRealTime(config.ConfigV2.New_user_poll_time)
 		if(SeedUserOrNot(probMap) == true) {
@@ -96,6 +99,8 @@ func OperateV2(){
 	Log.Debug.Printf("All Segments - Done !!!")
 	newUserWg.Wait()
 	Log.Debug.Printf("New Users - Done !!!")
+	globalTimerWg.Wait()
+	Log.Debug.Printf("Global Timer - Exit !!!")
 	Log.Debug.Printf("Main - Done !!!")
 }
 
@@ -113,6 +118,13 @@ type SegmentProbMap struct {
 type ProbMap struct {
 	newUserProbMap RangeMapMultiplierTuple
 	segmentProbMap map[string]SegmentProbMap
+}
+
+func WaitForNSeconds(wg *sync.WaitGroup, duration int){
+	defer wg.Done()
+	Log.Debug.Printf("Waiting for Total Activity Time")
+	WaitIfRealTime(duration)
+	globalTimer = true
 }
 
 func CreateNewUserProbMap()(RangeMapMultiplierTuple){
@@ -223,6 +235,10 @@ func GenerateEvents(wg *sync.WaitGroup, segmentConfig config.UserSegmentV2, acti
 					&lastKnownGoodState, 
 					segmentConfig.Event_probablity_map.Correlation_matrix.Seed_events, 
 					probMap)
+				if(utils.Contains(segmentConfig.Event_probablity_map.Correlation_matrix.Exit_events,event)){
+					Log.Debug.Printf("User %s Exit events: %s", userId, event)
+					break;
+				}
 			}
 			eventAttributes := SetEventAttributes(segmentConfig, event)
 
@@ -234,6 +250,7 @@ func GenerateEvents(wg *sync.WaitGroup, segmentConfig config.UserSegmentV2, acti
 		}
 		if(activity == "Exit"){
 			Log.Debug.Printf("Exit %s", userId)
+			break;
 		}	
 	}
 	Log.Debug.Printf("Done %s", userId)

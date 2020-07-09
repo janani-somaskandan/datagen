@@ -2,20 +2,20 @@
 # will be the total probablity of correlated events
 ---
 output_file_name: test1.log
-activity_time_in_seconds: 60
+activity_time_in_seconds: 1800
 real_time: true
 user_id_prefix: U
-new_user_poll_time: 10
-new_user_probablity: 0.5
+new_user_poll_time: 5
+new_user_probablity: 0.7
 per_tick_new_user_seed_count: 10
 user_segments: 
   segment1:
-    number_of_users: 1
+    number_of_users: 100
     activity_ticker_in_seconds: 1
     activity_probablity_map:
-      DoSomething: 0.5
-      NoOp: 0.499
-      Exit: 0.001
+      DoSomething: 0.3999
+      NoOp: 0.6
+      Exit: 0.0001
     event_probablity_map:
       correlation_matrix:
         events:
@@ -29,30 +29,30 @@ user_segments:
             Help_Desk: 0.05
           Help_Desk:
             Raise_Complaint: 0.9 
-            Home: 0.1
+            Logout: 0.1
           Raise_Complaint:
-            Home: 1.0
+            Logout: 1.0
           Contact_Us:
-            Home: 1.0
+            Logout: 1.0
           Payment_History:
-            Home: 1.0
+            Logout: 1.0
           Activity_History:
-            Home: 1.0
+            Logout: 1.0
           Performance_History:
             Performance_Improvements_Suggestion: 0.7
             Modify_Targetting: 0.1
-            Home: 0.2
+            Logout: 0.2
           Performance_Improvements_Suggestion:
-            Home: 0.5
+            Performance_History: 0.5
             Modify_Targetting: 0.5
           Modify_Targetting:
             Performance_Improvements_Suggestion: 0.5
-            Home: 0.5
+            Logout: 0.5
           Add_Payment_Instrument:
-            Home: 0.5
+            Logout: 0.5
             Add_Credit_card: 0.5
           Add_Credit_card:
-            Home: 1.0
+            Logout: 1.0
           Create_Ad:
             Check_Bid_Details: 0.6
             Check_Targetting_Details: 0.2
@@ -63,20 +63,23 @@ user_segments:
           Check_Targetting_Details:
             Upload_Image: 0.7
             Change_Presuggested_Targetting: 0.29
-            Home: 0.01
+            Create_Ad: 0.01
           Change_Presuggested_Targetting:
             Upload_Image: 0.99
-            Home: 0.01
+            Create_Ad: 0.01
           Upload_Image:
-            Home: 0.01
+            Create_Ad: 0.01
             Check_Ad_Preview: 0.99
           Check_Ad_Preview:
-            Home: 0.01
+            Create_Ad: 0.01
             Submit_Ad: 0.99
           Submit_Ad:
-            Home: 0.5
+            Logout: 0.5
             Create_Ad: 0.5
+          Logout:
+            Logout: 1.0
         seed_events: ['Home']
+        exit_events: ['Logout']
     event_attributes: 
       Home:
         category: PAGE_VIEW
@@ -113,6 +116,8 @@ user_segments:
       Check_Ad_Preview:
         category: PAGE_VIEW
       Submit_Ad:
+        category: CLICK_BUTTON
+      Logout:
         category: CLICK_BUTTON
     user_attributes:
       U1:
