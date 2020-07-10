@@ -25,11 +25,29 @@ type UserSegmentV2 struct {
     Activity_probablity_map map[string]float64
     Event_probablity_map EventProbablity
     Start_Time time.Time
-    Event_attributes map[string]map[string]string
-    User_attributes map[string]map[string]string
+    Event_attributes EventAttributes
+    User_attributes UserAttributes
     Set_attributes bool
-    
 }
+
+type EventAttributes struct {
+    Predefined map[string]map[string]string
+    Default []AttributeData
+    Custom  []AttributeData
+}
+
+type UserAttributes struct {
+    Default []AttributeData
+    Custom  []AttributeData
+}
+
+type AttributeData struct {
+    Key string
+    Order_Level int
+    Values map[string]interface{}
+    Dependency string
+}
+
 type ConfigurationV2 struct {  
     Output_file_name string
     Activity_time_in_seconds int
@@ -39,4 +57,6 @@ type ConfigurationV2 struct {
     New_user_poll_time int
     New_user_probablity float64
     Per_tick_new_user_seed_count int
+    Custom_user_attribute_probablity float64
+    Custom_event_attribute_probablity float64
 }

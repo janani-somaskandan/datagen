@@ -3,14 +3,16 @@
 ---
 output_file_name: test1.log
 activity_time_in_seconds: 1800
-real_time: true
+real_time: false
 user_id_prefix: U
 new_user_poll_time: 5
 new_user_probablity: 0.7
 per_tick_new_user_seed_count: 10
+custom_user_attribute_probablity: 0.3
+custom_event_attribute_probablity: 0.4
 user_segments: 
   segment1:
-    number_of_users: 100
+    number_of_users: 10
     activity_ticker_in_seconds: 1
     activity_probablity_map:
       DoSomething: 0.3999
@@ -81,80 +83,97 @@ user_segments:
         seed_events: ['Home']
         exit_events: ['Logout']
     event_attributes: 
-      Home:
-        category: PAGE_VIEW
-      Help_Desk:
-        category: PAGE_VIEW
-      Raise_Complaint:
-        category: CLICK_BUTTON
-      Contact_Us:
-        category: PAGE_VIEW
-      Payment_History:
-        category: PAGE_VIEW
-      Activity_History:
-        category: PAGE_VIEW
-      Performance_History:
-        category: PAGE_VIEW
-      Performance_Improvements_Suggestion:
-        category: PAGE_VIEW
-      Modify_Targetting:
-        category: CLICK_BUTTON
-      Add_Payment_Instrument:
-        category: PAGE_VIEW
-      Add_Credit_card:
-        category: CLICK_BUTTON
-      Create_Ad:
-        category: PAGE_VIEW
-      Check_Bid_Details:
-        category: PAGE_VIEW
-      Check_Targetting_Details:
-        category: PAGE_VIEW
-      Change_Presuggested_Targetting:
-        category: CLICK_BUTTON
-      Upload_Image:
-        category: PAGE_VIEW
-      Check_Ad_Preview:
-        category: PAGE_VIEW
-      Submit_Ad:
-        category: CLICK_BUTTON
-      Logout:
-        category: CLICK_BUTTON
+      predefined: 
+        Home:
+          category: PAGE_VIEW
+        Help_Desk:
+          category: PAGE_VIEW
+        Raise_Complaint:
+          category: CLICK_BUTTON
+        Contact_Us:
+          category: PAGE_VIEW
+        Payment_History:
+          category: PAGE_VIEW
+        Activity_History:
+          category: PAGE_VIEW
+        Performance_History:
+          category: PAGE_VIEW
+        Performance_Improvements_Suggestion:
+          category: PAGE_VIEW
+        Modify_Targetting:
+          category: CLICK_BUTTON
+        Add_Payment_Instrument:
+          category: PAGE_VIEW
+        Add_Credit_card:
+          category: CLICK_BUTTON
+        Create_Ad:
+          category: PAGE_VIEW
+        Check_Bid_Details:
+          category: PAGE_VIEW
+        Check_Targetting_Details:
+          category: PAGE_VIEW
+        Change_Presuggested_Targetting:
+          category: CLICK_BUTTON
+        Upload_Image:
+          category: PAGE_VIEW
+        Check_Ad_Preview:
+          category: PAGE_VIEW
+        Submit_Ad:
+          category: CLICK_BUTTON
+        Logout:
+          category: CLICK_BUTTON
+      default:
+      custom:
     user_attributes:
-      U1:
-        age: u1
-        gender: u2
-      U2:
-        age: u1
-        gender: u3
-      U3:
-        age: u4
-        gender: u2
-      U4:
-        age: u1
-        gender: u2
-      U5:
-        age: u1
-        gender: u3
-      U6:
-        age: u4
-        gender: u2
-      U7:
-        age: u1
-        gender: u2
-      U8:
-        age: u1
-        gender: u3
-      U9:
-        age: u4
-        gender: u2
-      U10:
-        age: u1
-        gender: u2
-      U11:
-        age: u1
-        gender: u3
-      U12:
-        age: u4
-        gender: u2
+      default:
+        -
+          key: Gender
+          order_level: 1
+          values:
+            Male: 0.5
+            Female: 0.5
+        -
+          key: Age
+          order_level: 1
+          values:
+            LessThan18: 0.2
+            18-25: 0.8
+        -
+          key: City
+          order_level: 3
+          values:
+            Karnataka:
+              Bengaluru: 0.5
+              Mysore: 0.5
+            TamilNadu:
+              Chennai: 0.5
+              Hosur: 0.5
+            California:
+              SunnyVale: 0.5
+              SanJose: 0.5
+            WashingtonDC:
+              Seattle: 0.5
+              Redmond: 0.5
+          dependency: State
+        -
+          key: State
+          order_level: 2
+          values:
+            India:
+              Karnataka : 0.8
+              TamilNadu: 0.2
+            US:
+              WashingtonDC: 0.5
+              California: 0.5
+          dependency: Country
+        -
+          key: Country
+          order_level: 1
+          values:
+            India: 0.5
+            US: 0.5
+      custom:
+        
+          
     set_attributes: true 
 ...

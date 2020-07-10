@@ -27,3 +27,10 @@ func Contains(a []string, x string) bool {
         }
         return false
 }
+
+func AppendMaps(a map[string]string, b map[string]string) (map[string]string){
+	for item, element := range b {
+		a[item] = element
+	}
+	return a
+}
