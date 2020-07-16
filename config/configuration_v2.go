@@ -7,9 +7,19 @@ Input object corresponding to YAML config
 import(
     "time"
 )
+type AttributeDependency struct{
+	Probablity float64
+	Attributes map[string][]string
+}
+
+type AttributeRule struct{
+	Real_time_wait int
+	Attribute_weights []AttributeDependency
+	Overall_probablity float64
+}
 
 type CorrelationMatrix struct {
-    Events map[string]map[string]float64
+    Events map[string]map[string]interface{}
     Seed_events []string
     Exit_events []string
 }
@@ -28,6 +38,7 @@ type UserSegmentV2 struct {
     Event_attributes EventAttributes
     User_attributes UserAttributes
     Set_attributes bool
+    Rules map[string]AttributeRule
 }
 
 type EventAttributes struct {

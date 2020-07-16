@@ -1,10 +1,16 @@
 package operations
 
+/*
+File containing all the real time based operations
+*/
+
 import(
 	"time"
 	"sync"
 	Log "../utils/Log"
 	"../config"
+	"strconv"
+	"fmt"
 )
 
 var globalTimer bool
@@ -27,4 +33,20 @@ func IsRealTime() bool {
 		return true
 	}
 	return false
+}
+
+func ComputeActivityTimestamp(segmentConfig config.UserSegmentV2, eventCounter int, realTimeWait int) (int, int){
+	
+	var counter int
+	if(realTimeWait != 0){
+		counter = realTimeWait
+	} else {
+		counter = segmentConfig.Activity_ticker_in_seconds
+	}
+	timestamp, _ := strconv.Atoi(
+		fmt.Sprintf("%v", 
+		segmentConfig.Start_Time.Add(
+			time.Second * time.Duration(
+				eventCounter + counter)).Unix()))
+	return timestamp, counter
 }

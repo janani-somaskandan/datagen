@@ -34,3 +34,10 @@ func AppendMaps(a map[string]string, b map[string]string) (map[string]string){
 	}
 	return a
 }
+
+func FindMax(a int, b int)(int){
+	if(a > b){
+		return a
+	}
+	return b
+}

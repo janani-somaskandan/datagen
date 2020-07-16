@@ -1,5 +1,9 @@
 package operations
 
+/*
+This file contains all core operations for probablity based event generation
+*/
+
 import(
 	"../utils"
 	"time"
@@ -41,9 +45,9 @@ func OperateV2(){
 		probMap.segmentProbMap[item] = PreComputeRangeMap(element)
 	}
 	probMap.yesOrNoProbMap = YesOrNoProbablityMap{ 
-		ComputeYesOrNoProbablityMap(config.ConfigV2.New_user_probablity),
-		ComputeYesOrNoProbablityMap(config.ConfigV2.Custom_event_attribute_probablity),
-		ComputeYesOrNoProbablityMap(config.ConfigV2.Custom_user_attribute_probablity)}
+		ComputeYesOrNoProbablityMap(config.ConfigV2.New_user_probablity, "NewUser"),
+		ComputeYesOrNoProbablityMap(config.ConfigV2.Custom_event_attribute_probablity, "Custom-Event"),
+		ComputeYesOrNoProbablityMap(config.ConfigV2.Custom_user_attribute_probablity, "Custom-User")}
 	Log.Debug.Printf("RangeMaps %v", probMap)
 
 	// Generate events per USER SEGMENT
@@ -130,11 +134,12 @@ func OperateOnSegment(segmentWg *sync.WaitGroup, probMap ProbMap, segmentName st
 		userId := config.ConfigV2.User_id_prefix+strconv.Itoa(i)
 		segmentProbMap.UserToUserAttributeMap[userId] = make(map[string]string)
 		segmentProbMap.UserToUserAttributeMap[userId] = GetUserAttributes(probMap, segmentProbMap, segment)
+		segmentProbMap.UserToUserAttributeMap[userId]["UserId"] = userId
 		go GenerateEvents(
 			&wg,
 			probMap,
 			segment,
-			(int)(config.ConfigV2.Activity_time_in_seconds / segment.Activity_ticker_in_seconds), 
+			config.ConfigV2.Activity_time_in_seconds, 
 			userId,
 			segmentProbMap)
 	}
@@ -145,17 +150,19 @@ func OperateOnSegment(segmentWg *sync.WaitGroup, probMap ProbMap, segmentName st
 	Log.Debug.Printf("Main: %s Completed for user Range %v - %v", segmentName, userRangeStart ,userRangeEnd)
 }
 
-func GenerateEvents(wg *sync.WaitGroup,probMap ProbMap, segmentConfig config.UserSegmentV2, activityDuration int, userId string, segmentProbMap SegmentProbMap) {
+func GenerateEvents(wg *sync.WaitGroup,probMap ProbMap, segmentConfig config.UserSegmentV2, totalActivityDuration int, userId string, segmentProbMap SegmentProbMap) {
 	
 	defer wg.Done()
 	rand.Seed(time.Now().UTC().UnixNano())
 	var lastKnownGoodState string
+	var realTimeWait int
 	
 	// Setting attributes in output
 	userAttributes := SetUserAttributes(segmentProbMap, segmentConfig, userId)
 
-	Log.Debug.Printf("Starting %s for duration %v", userId, activityDuration)
-    for i := 0; i < activityDuration; i++ {
+	Log.Debug.Printf("Starting %s for duration %v", userId, totalActivityDuration)
+	i := 0
+    for i < totalActivityDuration {
 		
 		activity := GetRandomActivity(segmentProbMap)
 		// TODO: Janani Have enums for these
@@ -164,10 +171,10 @@ func GenerateEvents(wg *sync.WaitGroup,probMap ProbMap, segmentConfig config.Use
 
 			if event == "EventCorrelation" {
 
-				event = GetRandomEventWithCorrelation(
+				event, realTimeWait = GetRandomEventWithCorrelation(
 					&lastKnownGoodState, 
 					segmentConfig.Event_probablity_map.Correlation_matrix.Seed_events, 
-					segmentProbMap)
+					segmentProbMap, userAttributes, segmentConfig)
 
 				if(utils.Contains(segmentConfig.Event_probablity_map.Correlation_matrix.Exit_events,event)){
 					Log.Debug.Printf("User %s Exit events: %s", userId, event)
@@ -176,10 +183,12 @@ func GenerateEvents(wg *sync.WaitGroup,probMap ProbMap, segmentConfig config.Use
 			}
 			eventAttributes := SetEventAttributes(segmentProbMap, segmentConfig, event)
 
-			op := FormatOutput(segmentConfig, userId, event, i, userAttributes, eventAttributes)
+			timeStamp, counter := ComputeActivityTimestamp(segmentConfig, i, realTimeWait)
+			op := FormatOutput(timeStamp, userId, event, userAttributes, eventAttributes)
 
 			registration.WriterInstance.Write(op)
-			WaitIfRealTime(segmentConfig.Activity_ticker_in_seconds)
+			i = i + counter
+			WaitIfRealTime(timeStamp)
 			
 		}
 		if(activity == "Exit"){
@@ -188,63 +197,4 @@ func GenerateEvents(wg *sync.WaitGroup,probMap ProbMap, segmentConfig config.Use
 		}	
 	}
 	Log.Debug.Printf("Done %s", userId)
-}
-
-func PreloadEventAttributes(probMap ProbMap, segmentConfig config.UserSegmentV2, segmentProbMap SegmentProbMap)(map[string]map[string]string){
-	eventToEventAttributes := make(map[string]map[string]string)
-	for item, _ := range segmentConfig.Event_probablity_map.Correlation_matrix.Events{
-		eventToEventAttributes[item] = GetEventAttributes(
-			probMap,
-			segmentProbMap,
-			segmentConfig,
-			item)
-	}
-	for item, _ := range segmentConfig.Event_probablity_map.Independent_events{
-		eventToEventAttributes[item] = GetEventAttributes(
-			probMap,
-			segmentProbMap,
-			segmentConfig,
-			item)
-	}
-	return eventToEventAttributes
-}
-func GetUserAttributes(probMap ProbMap, segmentProbMap SegmentProbMap, segmentConfig config.UserSegmentV2) map[string]string{
-	userAttr := make(map[string]string)
-	userAttr = PickAttributes(
-		segmentConfig.User_attributes.Default,
-		segmentProbMap.defaultUserAttrProbMap)
-	if(AddCustomUserAttributeOrNot(probMap)){
-		utils.AppendMaps(userAttr, PickAttributes(
-			segmentConfig.User_attributes.Custom,
-			segmentProbMap.customUserAttrProbMap))
-	}
-	return userAttr
-}
-
-func SetUserAttributes(segmentProbMap SegmentProbMap, segmentConfig config.UserSegmentV2, userId string) map[string]string{
-	if(segmentConfig.Set_attributes == true){
-		return segmentProbMap.UserToUserAttributeMap[userId]
-	}
-	return nil
-}
-
-func GetEventAttributes(probMap ProbMap, segmentProbMap SegmentProbMap, segmentConfig config.UserSegmentV2,eventName string) map[string]string{
-	eventAttr := make(map[string]string)
-	eventAttr = segmentConfig.Event_attributes.Predefined[eventName]
-	utils.AppendMaps(eventAttr, PickAttributes(
-		segmentConfig.Event_attributes.Default,
-		segmentProbMap.defaultEventAttrProbMap))
-	if(AddCustomUserAttributeOrNot(probMap)){
-		utils.AppendMaps(eventAttr, PickAttributes(
-			segmentConfig.Event_attributes.Custom,
-			segmentProbMap.defaultEventAttrProbMap))
-	}
-	return eventAttr
-}
-
-func SetEventAttributes(segmentProbMap SegmentProbMap, segmentConfig config.UserSegmentV2, event string) map[string]string{
-	if(segmentConfig.Set_attributes == true){
-		return segmentProbMap.EventToEventAttributeMap[event]
-	}
-	return nil
 }

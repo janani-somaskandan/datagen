@@ -2,18 +2,19 @@
 # will be the total probablity of correlated events
 ---
 output_file_name: test1.log
-activity_time_in_seconds: 1800
+activity_time_in_seconds: 60
 real_time: false
 user_id_prefix: U
-new_user_poll_time: 5
+new_user_poll_time: 2
 new_user_probablity: 0.7
 per_tick_new_user_seed_count: 10
 custom_user_attribute_probablity: 0.3
 custom_event_attribute_probablity: 0.4
 user_segments: 
   segment1:
-    number_of_users: 10
-    activity_ticker_in_seconds: 1
+    start_time: 2020-05-10 00:00:00
+    number_of_users: 1000
+    activity_ticker_in_seconds: 5
     activity_probablity_map:
       DoSomething: 0.3999
       NoOp: 0.6
@@ -22,12 +23,12 @@ user_segments:
       correlation_matrix:
         events:
           Home:
-            Create_Ad: 0.5
+            Create_Ad: RULE1
             Performance_History: 0.2
             Payment_History: 0.08
             Activity_History: 0.07
             Add_Payment_Instrument: 0.05
-            Contact_Us: 0.05
+            Contact_Us: RULE2
             Help_Desk: 0.05
           Help_Desk:
             Raise_Complaint: 0.9 
@@ -45,14 +46,15 @@ user_segments:
             Modify_Targetting: 0.1
             Logout: 0.2
           Performance_Improvements_Suggestion:
-            Performance_History: 0.5
-            Modify_Targetting: 0.5
+            Performance_History: 0.1
+            Modify_Targetting: 0.6
+            Logout: 0.3
           Modify_Targetting:
-            Performance_Improvements_Suggestion: 0.5
-            Logout: 0.5
+            Performance_Improvements_Suggestion: 0.1
+            Logout: 0.9
           Add_Payment_Instrument:
-            Logout: 0.5
-            Add_Credit_card: 0.5
+            Logout: 0.7
+            Add_Credit_card: RULE3
           Add_Credit_card:
             Logout: 1.0
           Create_Ad:
@@ -85,43 +87,43 @@ user_segments:
     event_attributes: 
       predefined: 
         Home:
-          category: PAGE_VIEW
+          Category: PAGE_VIEW
         Help_Desk:
-          category: PAGE_VIEW
+          Category: PAGE_VIEW
         Raise_Complaint:
-          category: CLICK_BUTTON
+          Category: CLICK_BUTTON
         Contact_Us:
-          category: PAGE_VIEW
+          Category: PAGE_VIEW
         Payment_History:
-          category: PAGE_VIEW
+          Category: PAGE_VIEW
         Activity_History:
-          category: PAGE_VIEW
+          Category: PAGE_VIEW
         Performance_History:
-          category: PAGE_VIEW
+          Category: PAGE_VIEW
         Performance_Improvements_Suggestion:
-          category: PAGE_VIEW
+          Category: PAGE_VIEW
         Modify_Targetting:
-          category: CLICK_BUTTON
+          Category: CLICK_BUTTON
         Add_Payment_Instrument:
-          category: PAGE_VIEW
+          Category: PAGE_VIEW
         Add_Credit_card:
-          category: CLICK_BUTTON
+          Category: CLICK_BUTTON
         Create_Ad:
-          category: PAGE_VIEW
+          Category: PAGE_VIEW
         Check_Bid_Details:
-          category: PAGE_VIEW
+          Category: PAGE_VIEW
         Check_Targetting_Details:
-          category: PAGE_VIEW
+          Category: PAGE_VIEW
         Change_Presuggested_Targetting:
-          category: CLICK_BUTTON
+          Category: CLICK_BUTTON
         Upload_Image:
-          category: PAGE_VIEW
+          Category: PAGE_VIEW
         Check_Ad_Preview:
-          category: PAGE_VIEW
+          Category: PAGE_VIEW
         Submit_Ad:
-          category: CLICK_BUTTON
+          Category: CLICK_BUTTON
         Logout:
-          category: CLICK_BUTTON
+          Category: CLICK_BUTTON
       default:
       custom:
     user_attributes:
@@ -136,8 +138,8 @@ user_segments:
           key: Age
           order_level: 1
           values:
-            LessThan18: 0.2
-            18-25: 0.8
+            LessThan18: 0.5
+            18-25: 0.5
         -
           key: City
           order_level: 3
@@ -172,8 +174,47 @@ user_segments:
           values:
             India: 0.5
             US: 0.5
-      custom:
-        
-          
+      custom:         
     set_attributes: true 
+    rules:
+      RULE1:
+        real_time_wait: 6
+        overall_probablity: 0.5
+        attribute_weights:
+          -
+            probablity: 0.7
+            attributes: 
+              Age: 
+                -
+                  18-25
+      RULE2:
+        real_time_wait: 8
+        overall_probablity: 0.05
+        attribute_weights:
+          -
+            probablity: 0.2
+            attributes:
+              Gender: 
+                -
+                  Male
+      RULE3:
+        real_time_wait: 10
+        overall_probablity: 0.3
+        attribute_weights:
+          -
+            probablity: 0.9
+            attributes:
+              Country: 
+                -
+                  US
+      RULE4:
+        real_time_wait: 5
+        overall_probablity: 0.08
+        attribute_weights:
+          -
+            probablity: 0.25
+            attributes:
+              Country: 
+                -
+                  UK
 ...

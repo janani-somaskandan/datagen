@@ -9,6 +9,7 @@ import(
 	"../config"
 	"fmt"
 	Log "../utils/Log"
+	"../utils"
 )
 
 
@@ -41,29 +42,25 @@ func SortAttributeMap(attributes []config.AttributeData){
 	Log.Debug.Printf("User Attributes After sorting: %v", attributes)
 }
 
-func GenerateProbablityMapForAttributes(attributes []config.AttributeData) (AttributeProbMap){
+func GenerateProbablityMapForAttributes(attributes []config.AttributeData, tag string) (AttributeProbMap){
 	var attributeProbMap AttributeProbMap
 	attributeProbMap.Attributes_Order1 = make(map[string]RangeMapMultiplierTuple)
 	attributeProbMap.Attributes_OrderOver1 = make(map[string]map[string]RangeMapMultiplierTuple)
 	for _, element := range attributes {
 		if(element.Order_Level == 1){
 			attributeProbMap.Attributes_Order1[element.Key] = 
-				ComputeRangeMap(Convert1(element.Values))
+				ComputeRangeMap(Convert1(element.Values), "Attributes")
 		}
 		if(element.Order_Level > 1){
 			attributeProbMap.Attributes_OrderOver1[element.Key] = make(map[string]RangeMapMultiplierTuple)
 			for key, value := range element.Values {
 				attributeProbMap.Attributes_OrderOver1[element.Key][key] = 
-					ComputeRangeMap(Convert2(value.(map[interface{}]interface{})))
+					ComputeRangeMap(Convert2(value.(map[interface{}]interface{})),"Attributes")
 			}
 		}
 	}
 	Log.Debug.Printf("UserAttributes Probablity Map: \n %v", attributeProbMap)
 	return attributeProbMap
-}
-
-func GenerateProbablityMapForCustomUserAttributes(){
-// Both orderLevel 1 and over 1
 }
 
 func PickAttributes(attributes []config.AttributeData, attributeProbMap AttributeProbMap)(map[string]string){
@@ -96,23 +93,91 @@ func PickAttributes(attributes []config.AttributeData, attributeProbMap Attribut
 	return attr
 }
 
-func SelectEventAttributes(){
-// Pick the default attributes at individual event level
-// Pick the custom attributes depending on yes/no
-// for now we will pick all
-// nothing to assign to global map
-}
-
-func ReassignProbOrNot(){
-// Take the event - user attributes
-// Check if it matches
-// Global level check need to happen to check if the sum of probablities = 1
-// Reassign probablity
-// Pick next event accordingly - adjusted to new probablity
-}
-
-func ReassignProbablity(){
+func ReassignProbablity(probMap map[string]valueBoolTuple, prevEvent string) (map[string]float64){
 	// Compute new probablities - Should be straight forward
 	// Generate new range map
 	// check 
+	reassignedProbMap := make(map[string]float64)
+	sum_changed := 0.0
+	sum_unchanged := 0.0
+	for item, element := range probMap {
+		if(element.change == true){
+			sum_changed += element.value
+			reassignedProbMap[item] = element.value
+		}
+		if(element.change == false){
+			sum_unchanged += element.value
+		}
+	}
+	if(sum_changed >= 1.0){
+		Log.Error.Fatal("Sum Probablities >= 1.0. Cannot Reassign ", prevEvent)
+	}
+	remainingProb := 1.0 - sum_changed
+	for item, element := range probMap {
+		if(element.change == false){
+			reassignedProbMap[item] = (remainingProb/sum_unchanged) * element.value
+		}
+	}
+	return reassignedProbMap
 }
+
+func PreloadEventAttributes(probMap ProbMap, segmentConfig config.UserSegmentV2, segmentProbMap SegmentProbMap)(map[string]map[string]string){
+	eventToEventAttributes := make(map[string]map[string]string)
+	for item, _ := range segmentConfig.Event_probablity_map.Correlation_matrix.Events{
+		eventToEventAttributes[item] = GetEventAttributes(
+			probMap,
+			segmentProbMap,
+			segmentConfig,
+			item)
+	}
+	for item, _ := range segmentConfig.Event_probablity_map.Independent_events{
+		eventToEventAttributes[item] = GetEventAttributes(
+			probMap,
+			segmentProbMap,
+			segmentConfig,
+			item)
+	}
+	return eventToEventAttributes
+}
+
+func GetUserAttributes(probMap ProbMap, segmentProbMap SegmentProbMap, segmentConfig config.UserSegmentV2) map[string]string{
+	userAttr := make(map[string]string)
+	userAttr = PickAttributes(
+		segmentConfig.User_attributes.Default,
+		segmentProbMap.defaultUserAttrProbMap)
+	if(AddCustomUserAttributeOrNot(probMap)){
+		utils.AppendMaps(userAttr, PickAttributes(
+			segmentConfig.User_attributes.Custom,
+			segmentProbMap.customUserAttrProbMap))
+	}
+	return userAttr
+}
+
+func SetUserAttributes(segmentProbMap SegmentProbMap, segmentConfig config.UserSegmentV2, userId string) map[string]string{
+	if(segmentConfig.Set_attributes == true){
+		return segmentProbMap.UserToUserAttributeMap[userId]
+	}
+	return nil
+}
+
+func GetEventAttributes(probMap ProbMap, segmentProbMap SegmentProbMap, segmentConfig config.UserSegmentV2,eventName string) map[string]string{
+	eventAttr := make(map[string]string)
+	eventAttr = segmentConfig.Event_attributes.Predefined[eventName]
+	utils.AppendMaps(eventAttr, PickAttributes(
+		segmentConfig.Event_attributes.Default,
+		segmentProbMap.defaultEventAttrProbMap))
+	if(AddCustomUserAttributeOrNot(probMap)){
+		utils.AppendMaps(eventAttr, PickAttributes(
+			segmentConfig.Event_attributes.Custom,
+			segmentProbMap.defaultEventAttrProbMap))
+	}
+	return eventAttr
+}
+
+func SetEventAttributes(segmentProbMap SegmentProbMap, segmentConfig config.UserSegmentV2, event string) map[string]string{
+	if(segmentConfig.Set_attributes == true){
+		return segmentProbMap.EventToEventAttributeMap[event]
+	}
+	return nil
+}
+
