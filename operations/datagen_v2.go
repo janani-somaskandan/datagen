@@ -26,7 +26,7 @@ func OperateV2(){
 	Segment1 will have users named U1,U2...U10 and 
 	Segment2 will have U11... U15
 	New seeded users will have name from U16*/
-	var userCounter int = 1
+	var userCounter int = config.ConfigV2.User_seed_number
 	userIndex := make(map[string]int)
 	for item, element := range config.ConfigV2.User_segments {
 		userIndex[item] = userCounter
@@ -188,7 +188,7 @@ func GenerateEvents(wg *sync.WaitGroup,probMap ProbMap, segmentConfig config.Use
 
 			registration.WriterInstance.Write(op)
 			i = i + counter
-			WaitIfRealTime(timeStamp)
+			WaitIfRealTime(realTimeWait)
 			
 		}
 		if(activity == "Exit"){

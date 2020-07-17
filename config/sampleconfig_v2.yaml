@@ -2,17 +2,18 @@
 # will be the total probablity of correlated events
 ---
 output_file_name: test1.log
-activity_time_in_seconds: 60
+activity_time_in_seconds: 3600
 real_time: false
 user_id_prefix: U
-new_user_poll_time: 2
+new_user_poll_time: 30
 new_user_probablity: 0.7
 per_tick_new_user_seed_count: 10
 custom_user_attribute_probablity: 0.3
 custom_event_attribute_probablity: 0.4
+user_seed_number: 10001
 user_segments: 
   segment1:
-    start_time: 2020-05-10 00:00:00
+    start_time: 2020-07-20 00:00:00
     number_of_users: 1000
     activity_ticker_in_seconds: 5
     activity_probablity_map:
@@ -25,7 +26,7 @@ user_segments:
           Home:
             Create_Ad: RULE1
             Performance_History: 0.2
-            Payment_History: 0.08
+            Payment_History: RULE4
             Activity_History: 0.07
             Add_Payment_Instrument: 0.05
             Contact_Us: RULE2
@@ -125,7 +126,19 @@ user_segments:
         Logout:
           Category: CLICK_BUTTON
       default:
+        -
+          key: Type
+          order_level: 1
+          values:
+            Travel: 0.5
+            Finance: 0.5
       custom:
+        -
+          key: utm-campaign
+          order_level: 1
+          values:
+            summer-sale: 0.5
+            winter-sale: 0.5
     user_attributes:
       default:
         -
@@ -138,8 +151,9 @@ user_segments:
           key: Age
           order_level: 1
           values:
-            LessThan18: 0.5
-            18-25: 0.5
+            LessThan18: 0.4
+            18-25: 0.4
+            MoreThan25: 0.2
         -
           key: City
           order_level: 3
@@ -156,6 +170,8 @@ user_segments:
             WashingtonDC:
               Seattle: 0.5
               Redmond: 0.5
+            Bristol:
+              Bristol: 1.0
           dependency: State
         -
           key: State
@@ -167,14 +183,35 @@ user_segments:
             US:
               WashingtonDC: 0.5
               California: 0.5
+            UK:
+              Bristol: 1.0
           dependency: Country
         -
           key: Country
           order_level: 1
           values:
-            India: 0.5
+            India: 0.2
             US: 0.5
-      custom:         
+            UK: 0.3
+      custom:
+        -
+          key: DeviceType
+          order_level: 1
+          values:
+            Desktop: 0.5
+            Mobile: 0.5
+        -
+          key: OS
+          order_level: 2
+          values:
+            Desktop:
+              Windows: 0.3
+              MacOS: 0.3
+              Linux: 0.4
+            Mobile:
+              Android: 0.5
+              iOS: 0.5
+          dependency: DeviceType
     set_attributes: true 
     rules:
       RULE1:
@@ -197,6 +234,9 @@ user_segments:
               Gender: 
                 -
                   Male
+              Country:
+                - 
+                  India
       RULE3:
         real_time_wait: 10
         overall_probablity: 0.3

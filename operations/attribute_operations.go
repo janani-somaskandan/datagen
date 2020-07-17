@@ -169,7 +169,7 @@ func GetEventAttributes(probMap ProbMap, segmentProbMap SegmentProbMap, segmentC
 	if(AddCustomUserAttributeOrNot(probMap)){
 		utils.AppendMaps(eventAttr, PickAttributes(
 			segmentConfig.Event_attributes.Custom,
-			segmentProbMap.defaultEventAttrProbMap))
+			segmentProbMap.customEventAttrProbMap))
 	}
 	return eventAttr
 }

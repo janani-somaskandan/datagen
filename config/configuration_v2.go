@@ -70,4 +70,5 @@ type ConfigurationV2 struct {
     Per_tick_new_user_seed_count int
     Custom_user_attribute_probablity float64
     Custom_event_attribute_probablity float64
+    User_seed_number int
 }

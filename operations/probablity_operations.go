@@ -124,8 +124,8 @@ func PreComputeRangeMap(segment config.UserSegmentV2) (SegmentProbMap) {
 
 	probMap.defaultUserAttrProbMap, probMap.customUserAttrProbMap = 
 		PreComputeUserAttributeProbMap(segment.User_attributes)
-	probMap.defaultEventAttrProbMap, probMap.customEventAttrProbMap = 
-		PreComputeUserAttributeProbMap(segment.User_attributes)
+	probMap.defaultEventAttrProbMap, probMap.customEventAttrProbMap =
+		PreComputeEventAttributeProbMap(segment.Event_attributes)
 	return probMap
 }
 
