@@ -42,7 +42,7 @@ type UserSegmentV2 struct {
 }
 
 type EventAttributes struct {
-    Predefined map[string]map[string]string
+    Predefined map[string]map[string]map[string]float64
     Default []AttributeData
     Custom  []AttributeData
 }

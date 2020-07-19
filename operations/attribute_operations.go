@@ -162,7 +162,7 @@ func SetUserAttributes(segmentProbMap SegmentProbMap, segmentConfig config.UserS
 
 func GetEventAttributes(probMap ProbMap, segmentProbMap SegmentProbMap, segmentConfig config.UserSegmentV2,eventName string) map[string]string{
 	eventAttr := make(map[string]string)
-	eventAttr = segmentConfig.Event_attributes.Predefined[eventName]
+	eventAttr = PickPredefinedAttributes(segmentProbMap.predefinedEventAttrProbMap[eventName])
 	utils.AppendMaps(eventAttr, PickAttributes(
 		segmentConfig.Event_attributes.Default,
 		segmentProbMap.defaultEventAttrProbMap))
@@ -179,5 +179,13 @@ func SetEventAttributes(segmentProbMap SegmentProbMap, segmentConfig config.User
 		return segmentProbMap.EventToEventAttributeMap[event]
 	}
 	return nil
+}
+
+func PickPredefinedAttributes(predefined map[string]RangeMapMultiplierTuple) map[string]string{
+	op := make(map[string]string)
+	for item, element := range predefined {
+		op[item] = GetRandomValueWithProbablity(element, item)
+	}
+	return op
 }
 

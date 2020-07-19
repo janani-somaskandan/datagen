@@ -21,7 +21,7 @@ func RegisterHandlers(){
 	Log.Debug.Println("Registering Yaml Parser")
 	var _parser parser.IParser
 	_parser = parser.YamlParser{}
-	config.GenerateInputConfigV2(_parser,"sampleconfig_v2.yaml")
+	config.GenerateInputConfigV2(_parser,"livspace.yaml")
 	// log.Println("Registering Output to File Writer")
 	// WriterInstance = utils.FileWriter{}
 	// WriterInstance.RegisterOutputFile(config.ConfigV2.Output_file_name)

@@ -88,43 +88,62 @@ user_segments:
     event_attributes: 
       predefined: 
         Home:
-          Category: PAGE_VIEW
+          Category: 
+            PAGE_VIEW: 1.0
         Help_Desk:
-          Category: PAGE_VIEW
+          Category: 
+            PAGE_VIEW: 1.0
         Raise_Complaint:
-          Category: CLICK_BUTTON
+          Category: 
+            CLICK_BUTTON: 1.0
         Contact_Us:
-          Category: PAGE_VIEW
+          Category: 
+            PAGE_VIEW: 1.0
         Payment_History:
-          Category: PAGE_VIEW
+          Category: 
+            PAGE_VIEW: 1.0
         Activity_History:
-          Category: PAGE_VIEW
+          Category: 
+            PAGE_VIEW: 1.0
         Performance_History:
-          Category: PAGE_VIEW
+          Category: 
+            PAGE_VIEW: 1.0
         Performance_Improvements_Suggestion:
-          Category: PAGE_VIEW
+          Category: 
+            PAGE_VIEW: 1.0
         Modify_Targetting:
-          Category: CLICK_BUTTON
+          Category: 
+            CLICK_BUTTON: 1.0
         Add_Payment_Instrument:
-          Category: PAGE_VIEW
+          Category: 
+            PAGE_VIEW: 1.0
         Add_Credit_card:
-          Category: CLICK_BUTTON
+          Category: 
+            CLICK_BUTTON: 1.0
         Create_Ad:
-          Category: PAGE_VIEW
+          Category: 
+            PAGE_VIEW: 1.0
         Check_Bid_Details:
-          Category: PAGE_VIEW
+          Category: 
+            PAGE_VIEW: 1.0
         Check_Targetting_Details:
-          Category: PAGE_VIEW
+          Category: 
+            PAGE_VIEW: 1.0
         Change_Presuggested_Targetting:
-          Category: CLICK_BUTTON
+          Category: 
+            CLICK_BUTTON: 1.0
         Upload_Image:
-          Category: PAGE_VIEW
+          Category: 
+            PAGE_VIEW: 1.0
         Check_Ad_Preview:
-          Category: PAGE_VIEW
+          Category: 
+            PAGE_VIEW: 1.0
         Submit_Ad:
-          Category: CLICK_BUTTON
+          Category: 
+            CLICK_BUTTON: 1.0
         Logout:
-          Category: CLICK_BUTTON
+          Category: 
+            CLICK_BUTTON: 1.0
       default:
         -
           key: Type

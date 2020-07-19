@@ -30,6 +30,7 @@ type SegmentProbMap struct {
 	customUserAttrProbMap AttributeProbMap
 	defaultEventAttrProbMap AttributeProbMap
 	customEventAttrProbMap AttributeProbMap
+	predefinedEventAttrProbMap map[string]map[string]RangeMapMultiplierTuple
 	UserToUserAttributeMap map[string]map[string]string
 	EventToEventAttributeMap map[string]map[string]string
 }
@@ -92,6 +93,7 @@ func PreComputeRangeMap(segment config.UserSegmentV2) (SegmentProbMap) {
 	probMap.EventCorrelationProbMap = make(map[string]RangeMapMultiplierTuple)
 	probMap.EventAttributeRule = make(map[string]map[string]config.AttributeRule)
 	probMap.EventCorrelationMapNormalized = make(map[string]map[string]float64)
+	probMap.predefinedEventAttrProbMap = make(map[string]map[string]RangeMapMultiplierTuple)
 
 	for item1, element1 := range segment.Event_probablity_map.Correlation_matrix.Events {
 		eventCorrelations := make(map[string]float64)
@@ -121,6 +123,14 @@ func PreComputeRangeMap(segment config.UserSegmentV2) (SegmentProbMap) {
 	events["EventCorrelation"] = (1.0 - sum)
 	probMap.eventProbMap = ComputeRangeMap(events, "Event")
 	probMap.activityProbMap = ComputeRangeMap(segment.Activity_probablity_map, "Actiivity")
+
+	for item1, element1 := range segment.Event_attributes.Predefined{
+		probMap.predefinedEventAttrProbMap[item1] = make(map[string]RangeMapMultiplierTuple)
+		for item2, element2 := range element1 {
+			probMap.predefinedEventAttrProbMap[item1][item2] = 
+				ComputeRangeMap(element2, fmt.Sprintf("%s-%s-%s","PredefinedMap",item1, item2))
+		}
+	}
 
 	probMap.defaultUserAttrProbMap, probMap.customUserAttrProbMap = 
 		PreComputeUserAttributeProbMap(segment.User_attributes)

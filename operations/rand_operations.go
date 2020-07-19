@@ -95,6 +95,8 @@ func GetAttributesBasedProbablityMap(lastKnownGoodState *string, probMap Segment
 }
 
 func IsProbablityOverridden(attributeRule config.AttributeRule, userAttributes map[string]string)( float64,bool, int){
+	// If there are multiple matches from attribute probablity map
+	// Pick the highest
 	highest := 0.0
 	probablityModified := false
 	for _, element1 := range attributeRule.Attribute_weights {
