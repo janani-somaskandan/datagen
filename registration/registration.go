@@ -10,6 +10,7 @@ import(
 	"../utils"
 	"../adaptors"
 	Log "../utils/Log"
+	"fmt"
 )
 
 var WriterInstance adaptors.Writer
@@ -30,7 +31,7 @@ func RegisterHandlers(){
 	WriterInstance.RegisterOutputFile(config.ConfigV2.Output_file_name)
 
 	Log.Debug.Println("Registering UserData to Log Writer")
-	WriterInstance.RegisterUserDataFile(config.ConfigV2.User_data_file_name)
+	WriterInstance.RegisterUserDataFile(fmt.Sprintf("%s.log",config.ConfigV2.User_data_file_name_prefix))
 	
 	Log.Debug.Println("Registration Done !!!")
 }

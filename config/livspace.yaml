@@ -2,7 +2,7 @@
 # will be the total probablity of correlated events
 ---
 output_file_name: livspace.log
-user_data_file_name: "userdata.log"
+user_data_file_name_prefix: "userdata"
 activity_time_in_seconds: 60
 real_time: false
 user_id_prefix: U
@@ -12,11 +12,11 @@ per_tick_new_user_seed_count: 10
 custom_user_attribute_probablity: 0.3
 custom_event_attribute_probablity: 0.4
 user_seed_number: 11
-bring_existing_user: 0.5
+bring_existing_user: 0
 user_segments: 
   segment1:
     start_time: 2020-05-01 00:00:00
-    number_of_users: 10
+    number_of_users: 10000
     activity_ticker_in_seconds: 1
     activity_probablity_map:
       DoSomething: 0.3999

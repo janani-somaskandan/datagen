@@ -15,6 +15,8 @@ import(
 	"strconv"
 )
 
+var userAttributeMutex = &sync.Mutex{}
+
 func OperateV2(){
 
 	//Declaring WaitGroup for SegmentLevel and newUser Concurrency
@@ -26,9 +28,9 @@ func OperateV2(){
 	Segment1 will have users named U1,U2...U10 and 
 	Segment2 will have U11... U15
 	New seeded users will have name from U16*/
-	existingUsers := LoadExistingUsers()
+	existingUsers := LoadExistingUsers() //thread safe
 	var userCounter int = config.ConfigV2.User_seed_number
-	userIndex := make(map[string]int)
+	userIndex := make(map[string]int) // thread safe
 	for item, element := range config.ConfigV2.User_segments {
 		userIndex[item] = userCounter
 		userCounter = userCounter + element.Number_of_users 
@@ -41,17 +43,26 @@ func OperateV2(){
 		4. New User seed probablity
 	*/
 	var probMap ProbMap
-	probMap.segmentProbMap = make(map[string]SegmentProbMap)
-	for item, element := range config.ConfigV2.User_segments {
-		probMap.segmentProbMap[item] = PreComputeRangeMap(element)
-	}
+
 	probMap.yesOrNoProbMap = YesOrNoProbablityMap{ 
 		ComputeYesOrNoProbablityMap(config.ConfigV2.New_user_probablity, "NewUser"),
 		ComputeYesOrNoProbablityMap(config.ConfigV2.Custom_event_attribute_probablity, "Custom-Event"),
 		ComputeYesOrNoProbablityMap(config.ConfigV2.Custom_user_attribute_probablity, "Custom-User"),
 		ComputeYesOrNoProbablityMap(config.ConfigV2.Bring_existing_user, "Bring-User")}
-	Log.Debug.Printf("RangeMaps %v", probMap)
 
+	probMap.segmentProbMap = make(map[string]SegmentProbMap)
+	for item, element := range config.ConfigV2.User_segments {
+		probMap.segmentProbMap[item] = PreComputeRangeMap(element)
+		// All the following shortcuts are for handling this error
+		//  cannot assign to struct field in map
+		// Need to fix it properly : TODO janani
+		temp := probMap.segmentProbMap[item]
+		temp.EventToEventAttributeMap = PreloadEventAttributes(probMap, element, probMap.segmentProbMap[item])
+		temp.UserToUserAttributeMap = make(map[string]map[string]string)
+		probMap.segmentProbMap[item] = temp
+	}
+	Log.Debug.Printf("RangeMaps %v", probMap)
+	
 	// Generate events per USER SEGMENT
 	// segmentStatus variable is used to check if all the segments are done executing
 	segmentStatus := make(map[string]bool)
@@ -123,12 +134,11 @@ func OperateOnSegment(segmentWg *sync.WaitGroup, probMap ProbMap,
 	var wg sync.WaitGroup
 	var userAttributes map[string]string
 	var userId string
-	segmentProbMap.UserToUserAttributeMap = make(map[string]map[string]string)
-	segmentProbMap.EventToEventAttributeMap = PreloadEventAttributes(probMap, segment, segmentProbMap)
 	Log.Debug.Printf("Main: Operating on %s with User Range %v - %v", segmentName , userRangeStart ,userRangeEnd)
 	//Generating events per user in the segment
 	for i := userRangeStart; i<= userRangeEnd; i++ {
 		wg.Add(1)
+		userAttributeMutex.Lock()
 		if(BringExistingUserOrNot(probMap)){
 			userId, userAttributes = PickFromExistingUsers(existingUsers)
 			for UserAlreadyExists(userId, segmentProbMap.UserToUserAttributeMap){
@@ -143,6 +153,7 @@ func OperateOnSegment(segmentWg *sync.WaitGroup, probMap ProbMap,
 			segmentProbMap.UserToUserAttributeMap[userId]["UserId"] = userId
 			registration.WriterInstance.WriteUserData(FormatUserData(userId, segmentProbMap.UserToUserAttributeMap[userId]))
 		}
+		userAttributeMutex.Unlock()
 		go GenerateEvents(
 			&wg,
 			probMap,
@@ -185,7 +196,7 @@ func GenerateEvents(wg *sync.WaitGroup,probMap ProbMap, segmentConfig config.Use
 					segmentConfig.Event_probablity_map.Correlation_matrix.Seed_events, 
 					segmentProbMap, userAttributes, segmentConfig)
 
-				decorators = GetEventDecorators(event, segmentProbMap)
+					decorators = GetEventDecorators(event, segmentProbMap)
 				if(utils.Contains(segmentConfig.Event_probablity_map.Correlation_matrix.Exit_events,event)){
 					Log.Debug.Printf("User %s Exit events: %s", userId, event)
 					break;
@@ -193,9 +204,9 @@ func GenerateEvents(wg *sync.WaitGroup,probMap ProbMap, segmentConfig config.Use
 			}
 
 			eventAttributes := SetEventAttributes(segmentProbMap, segmentConfig, event)
-			utils.AppendMaps(eventAttributes, decorators)
+			eventAttributesWithDecorators := utils.AppendMaps(eventAttributes, decorators)
 			timeStamp, counter := ComputeActivityTimestamp(segmentConfig, i, realTimeWait)
-			op := FormatOutput(timeStamp, userId, event, userAttributes, eventAttributes)
+			op := FormatOutput(timeStamp, userId, event, userAttributes, eventAttributesWithDecorators)
 
 			registration.WriterInstance.WriteOutput(op)
 			i = i + counter

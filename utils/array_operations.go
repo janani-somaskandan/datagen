@@ -29,10 +29,14 @@ func Contains(a []string, x string) bool {
 }
 
 func AppendMaps(a map[string]string, b map[string]string) (map[string]string){
-	for item, element := range b {
-		a[item] = element
+	temp := make(map[string]string)
+	for item, element := range a {
+		temp[item] = element
 	}
-	return a
+	for item, element := range b {
+		temp[item] = element
+	}
+	return temp
 }
 
 func FindMax(a int, b int)(int){

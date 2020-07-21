@@ -6,6 +6,7 @@ import(
 	"bufio"
 	"strings"
 	"encoding/json"
+	"fmt"
 )
 
 func ExtractUserData(data string)(string, map[string]string){
@@ -20,14 +21,24 @@ func ExtractUserData(data string)(string, map[string]string){
 }
 
 func LoadExistingUsers()map[string]map[string]string {
+	files := utils.GetAllUnreadFiles(".",config.ConfigV2.User_data_file_name_prefix)
 	userData := make(map[string]map[string]string)
-	reader := utils.GetFileHandle(config.ConfigV2.User_data_file_name)
+	for _, element := range files {
+		reader := utils.GetFileHandlegz(element)
 		scanner := bufio.NewScanner(reader)
 		for scanner.Scan() {
 			s := scanner.Text()
 			userId, attributes := ExtractUserData(s)
 			userData[userId] = attributes
 		}
+	}
+	reader := utils.GetFileHandle(fmt.Sprintf("%s.log",config.ConfigV2.User_data_file_name_prefix))
+	scanner := bufio.NewScanner(reader)
+	for scanner.Scan() {
+		s := scanner.Text()
+		userId, attributes := ExtractUserData(s)
+		userData[userId] = attributes
+	}
 	return userData
 }
 

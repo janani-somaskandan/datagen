@@ -63,7 +63,7 @@ type AttributeData struct {
 
 type ConfigurationV2 struct {  
     Output_file_name string
-    User_data_file_name string
+    User_data_file_name_prefix string
     Activity_time_in_seconds int
     Real_Time bool
     User_id_prefix string

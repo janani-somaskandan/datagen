@@ -170,11 +170,14 @@ func GetUserAttributes(probMap ProbMap, segmentProbMap SegmentProbMap, segmentCo
 	return userAttr
 }
 
-func SetUserAttributes(segmentProbMap SegmentProbMap, segmentConfig config.UserSegmentV2, userId string) map[string]string{
+func SetUserAttributes(segmentProbMap SegmentProbMap, segmentConfig config.UserSegmentV2, userId string) map[string]string{	
+	attr := make(map[string]string)
+	userAttributeMutex.Lock()
 	if(segmentConfig.Set_attributes == true){
-		return segmentProbMap.UserToUserAttributeMap[userId]
+		attr = segmentProbMap.UserToUserAttributeMap[userId]
 	}
-	return nil
+	userAttributeMutex.Unlock()
+	return attr 	
 }
 
 func GetEventAttributes(probMap ProbMap, segmentProbMap SegmentProbMap, segmentConfig config.UserSegmentV2,eventName string) map[string]string{
@@ -183,7 +186,7 @@ func GetEventAttributes(probMap ProbMap, segmentProbMap SegmentProbMap, segmentC
 	utils.AppendMaps(eventAttr, PickAttributes(
 		segmentConfig.Event_attributes.Default,
 		segmentProbMap.defaultEventAttrProbMap))
-	if(AddCustomUserAttributeOrNot(probMap)){
+	if(AddCustomEventAttributeOrNot(probMap)){
 		utils.AppendMaps(eventAttr, PickAttributes(
 			segmentConfig.Event_attributes.Custom,
 			segmentProbMap.customEventAttrProbMap))
@@ -195,7 +198,7 @@ func SetEventAttributes(segmentProbMap SegmentProbMap, segmentConfig config.User
 	if(segmentConfig.Set_attributes == true){
 		return segmentProbMap.EventToEventAttributeMap[event]
 	}
-	return nil
+	return make(map[string]string)
 }
 
 func PickPredefinedAttributes(predefined map[string]RangeMapMultiplierTuple) map[string]string{
