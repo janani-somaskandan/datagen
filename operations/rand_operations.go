@@ -31,13 +31,13 @@ func AddCustomUserAttributeOrNot(probMap ProbMap)bool {
 	return DecideYesOrNo(probMap.yesOrNoProbMap.AddCustomUserAttribute, "Add Custom User Attribute")
 }
 
+func BringExistingUserOrNot(probMap ProbMap)bool {
+	return DecideYesOrNo(probMap.yesOrNoProbMap.BringExistingUser, "Bring Existing User")
+}
+
 func DecideYesOrNo(rangeMap RangeMapMultiplierTuple, tag string)bool{
-	r := rand.Intn(rangeMap.multiplier)
-	yesOrNo, state := rangeMap.probRangeMap.Get(r)
-	if(state == false){
-		Log.Error.Fatal(fmt.Sprintf("Tag: %s Key not found %v",tag, r))
-	}
-	if(yesOrNo == "Yes") {
+	yesOrNo := GetRandomValueWithProbablity(rangeMap, tag)
+	if(yesOrNo == YES) {
 		return true
 	}
 	return false
@@ -117,6 +117,16 @@ func IsProbablityOverridden(attributeRule config.AttributeRule, userAttributes m
 	return highest, probablityModified, attributeRule.Real_time_wait
 }
 
+func GetEventDecorators(eventName string, segmentProbMap SegmentProbMap)map[string]string {
+	decorators := make(map[string]string)
+	if(segmentProbMap.EventDecoratorProbMap[eventName] != nil){
+		for item, element := range segmentProbMap.EventDecoratorProbMap[eventName]{
+			decorators[item] = GetRandomValueWithProbablity(element, fmt.Sprintf("Decorator-%s-%s", eventName, item))
+		}
+	}
+	return decorators
+}
+
 func GetRandomValueWithProbablity(rangeMap RangeMapMultiplierTuple, tag string) string {
 	r := rand.Intn(rangeMap.multiplier)
 	value, state := rangeMap.probRangeMap.Get(r)
@@ -124,4 +134,13 @@ func GetRandomValueWithProbablity(rangeMap RangeMapMultiplierTuple, tag string) 
 		Log.Error.Fatal(fmt.Sprintf("Tag: %s, RangeMap: Key not found %v", tag, r))
 	}
 	return value
+}
+
+func PickFromExistingUsers(users map[string]map[string]string)(string, map[string]string){
+	keys := []string{}
+    for key, _ := range users {
+        keys = append(keys, key)
+	}
+	r := rand.Intn(len(keys))
+	return keys[r], users[keys[r]]
 }

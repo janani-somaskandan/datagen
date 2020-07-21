@@ -36,6 +36,7 @@ type UserSegmentV2 struct {
     Event_probablity_map EventProbablity
     Start_Time time.Time
     Event_attributes EventAttributes
+    Event_decorators map[string]map[string]map[string]float64
     User_attributes UserAttributes
     Set_attributes bool
     Rules map[string]AttributeRule
@@ -57,10 +58,12 @@ type AttributeData struct {
     Order_Level int
     Values map[string]interface{}
     Dependency string
+    Data_type string
 }
 
 type ConfigurationV2 struct {  
     Output_file_name string
+    User_data_file_name string
     Activity_time_in_seconds int
     Real_Time bool
     User_id_prefix string
@@ -71,4 +74,5 @@ type ConfigurationV2 struct {
     Custom_user_attribute_probablity float64
     Custom_event_attribute_probablity float64
     User_seed_number int
+    Bring_existing_user float64
 }

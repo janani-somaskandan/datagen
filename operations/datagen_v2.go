@@ -26,6 +26,7 @@ func OperateV2(){
 	Segment1 will have users named U1,U2...U10 and 
 	Segment2 will have U11... U15
 	New seeded users will have name from U16*/
+	existingUsers := LoadExistingUsers()
 	var userCounter int = config.ConfigV2.User_seed_number
 	userIndex := make(map[string]int)
 	for item, element := range config.ConfigV2.User_segments {
@@ -47,7 +48,8 @@ func OperateV2(){
 	probMap.yesOrNoProbMap = YesOrNoProbablityMap{ 
 		ComputeYesOrNoProbablityMap(config.ConfigV2.New_user_probablity, "NewUser"),
 		ComputeYesOrNoProbablityMap(config.ConfigV2.Custom_event_attribute_probablity, "Custom-Event"),
-		ComputeYesOrNoProbablityMap(config.ConfigV2.Custom_user_attribute_probablity, "Custom-User")}
+		ComputeYesOrNoProbablityMap(config.ConfigV2.Custom_user_attribute_probablity, "Custom-User"),
+		ComputeYesOrNoProbablityMap(config.ConfigV2.Bring_existing_user, "Bring-User")}
 	Log.Debug.Printf("RangeMaps %v", probMap)
 
 	// Generate events per USER SEGMENT
@@ -64,7 +66,8 @@ func OperateV2(){
 			probMap.segmentProbMap[item], 
 			userIndex[item], 
 			userIndex[item] + element.Number_of_users -1, 
-			segmentStatus)
+			segmentStatus,
+			existingUsers)
 	}
 
 	Log.Debug.Printf("Main: Waiting for All Segments to finish")
@@ -94,7 +97,8 @@ func OperateV2(){
 				probMap.segmentProbMap[seg],
 				i,
 				end,
-				newUserSegmentStatus)
+				newUserSegmentStatus,
+				existingUsers)
 			i = end + 1
 			allSegmentsDone = IsAllSegmentsDone(segmentStatus)
 				
@@ -109,32 +113,36 @@ func OperateV2(){
 	Log.Debug.Printf("Main - Done !!!")
 }
 
-func IsAllSegmentsDone(segmentStatus map[string]bool) bool {
-
-	allSegmentsDone := true
-	for _,element := range segmentStatus {
-		if element == false {
-			allSegmentsDone = false
-			break
-		}
-	}
-	return allSegmentsDone
-}
-
-func OperateOnSegment(segmentWg *sync.WaitGroup, probMap ProbMap, segmentName string, segment config.UserSegmentV2, segmentProbMap SegmentProbMap, userRangeStart int, userRangeEnd int, segmentStatus map[string]bool){
+func OperateOnSegment(segmentWg *sync.WaitGroup, probMap ProbMap, 
+	segmentName string, segment config.UserSegmentV2, 
+	segmentProbMap SegmentProbMap, userRangeStart int, 
+	userRangeEnd int, segmentStatus map[string]bool,
+	existingUsers map[string]map[string]string){
 
 	defer segmentWg.Done()
 	var wg sync.WaitGroup
+	var userAttributes map[string]string
+	var userId string
 	segmentProbMap.UserToUserAttributeMap = make(map[string]map[string]string)
 	segmentProbMap.EventToEventAttributeMap = PreloadEventAttributes(probMap, segment, segmentProbMap)
 	Log.Debug.Printf("Main: Operating on %s with User Range %v - %v", segmentName , userRangeStart ,userRangeEnd)
 	//Generating events per user in the segment
 	for i := userRangeStart; i<= userRangeEnd; i++ {
 		wg.Add(1)
-		userId := config.ConfigV2.User_id_prefix+strconv.Itoa(i)
-		segmentProbMap.UserToUserAttributeMap[userId] = make(map[string]string)
-		segmentProbMap.UserToUserAttributeMap[userId] = GetUserAttributes(probMap, segmentProbMap, segment)
-		segmentProbMap.UserToUserAttributeMap[userId]["UserId"] = userId
+		if(BringExistingUserOrNot(probMap)){
+			userId, userAttributes = PickFromExistingUsers(existingUsers)
+			for UserAlreadyExists(userId, segmentProbMap.UserToUserAttributeMap){
+				userId, userAttributes = PickFromExistingUsers(existingUsers)
+			}
+			Log.Debug.Printf("Getting user %s back to system", userId)
+			segmentProbMap.UserToUserAttributeMap[userId] = userAttributes
+		}else {
+			userId = config.ConfigV2.User_id_prefix+strconv.Itoa(i)
+			segmentProbMap.UserToUserAttributeMap[userId] = make(map[string]string)
+			segmentProbMap.UserToUserAttributeMap[userId] = GetUserAttributes(probMap, segmentProbMap, segment)
+			segmentProbMap.UserToUserAttributeMap[userId]["UserId"] = userId
+			registration.WriterInstance.WriteUserData(FormatUserData(userId, segmentProbMap.UserToUserAttributeMap[userId]))
+		}
 		go GenerateEvents(
 			&wg,
 			probMap,
@@ -156,6 +164,7 @@ func GenerateEvents(wg *sync.WaitGroup,probMap ProbMap, segmentConfig config.Use
 	rand.Seed(time.Now().UTC().UnixNano())
 	var lastKnownGoodState string
 	var realTimeWait int
+	var decorators map[string]string
 	
 	// Setting attributes in output
 	userAttributes := SetUserAttributes(segmentProbMap, segmentConfig, userId)
@@ -166,32 +175,34 @@ func GenerateEvents(wg *sync.WaitGroup,probMap ProbMap, segmentConfig config.Use
 		
 		activity := GetRandomActivity(segmentProbMap)
 		// TODO: Janani Have enums for these
-		if activity == "DoSomething" {
+		if activity == DOSOMETHING {
 			event := GetRandomEvent(segmentProbMap)
 
-			if event == "EventCorrelation" {
+			if event == EVENTCORRELATION {
 
 				event, realTimeWait = GetRandomEventWithCorrelation(
 					&lastKnownGoodState, 
 					segmentConfig.Event_probablity_map.Correlation_matrix.Seed_events, 
 					segmentProbMap, userAttributes, segmentConfig)
 
+				decorators = GetEventDecorators(event, segmentProbMap)
 				if(utils.Contains(segmentConfig.Event_probablity_map.Correlation_matrix.Exit_events,event)){
 					Log.Debug.Printf("User %s Exit events: %s", userId, event)
 					break;
 				}
 			}
-			eventAttributes := SetEventAttributes(segmentProbMap, segmentConfig, event)
 
+			eventAttributes := SetEventAttributes(segmentProbMap, segmentConfig, event)
+			utils.AppendMaps(eventAttributes, decorators)
 			timeStamp, counter := ComputeActivityTimestamp(segmentConfig, i, realTimeWait)
 			op := FormatOutput(timeStamp, userId, event, userAttributes, eventAttributes)
 
-			registration.WriterInstance.Write(op)
+			registration.WriterInstance.WriteOutput(op)
 			i = i + counter
 			WaitIfRealTime(realTimeWait)
 			
 		}
-		if(activity == "Exit"){
+		if(activity == EXIT){
 			Log.Debug.Printf("Exit %s", userId)
 			break;
 		}	

@@ -14,7 +14,7 @@ user_seed_number: 10001
 user_segments: 
   segment1:
     start_time: 2020-07-20 00:00:00
-    number_of_users: 1000
+    number_of_users: 10
     activity_ticker_in_seconds: 5
     activity_probablity_map:
       DoSomething: 0.3999

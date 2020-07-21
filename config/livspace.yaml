@@ -2,7 +2,8 @@
 # will be the total probablity of correlated events
 ---
 output_file_name: livspace.log
-activity_time_in_seconds: 3600
+user_data_file_name: "userdata.log"
+activity_time_in_seconds: 60
 real_time: false
 user_id_prefix: U
 new_user_poll_time: 30
@@ -10,12 +11,13 @@ new_user_probablity: 0.7
 per_tick_new_user_seed_count: 10
 custom_user_attribute_probablity: 0.3
 custom_event_attribute_probablity: 0.4
-user_seed_number: 6001
+user_seed_number: 11
+bring_existing_user: 0.5
 user_segments: 
   segment1:
-    start_time: 2020-04-07 00:00:00
-    number_of_users: 1000
-    activity_ticker_in_seconds: 5
+    start_time: 2020-05-01 00:00:00
+    number_of_users: 10
+    activity_ticker_in_seconds: 1
     activity_probablity_map:
       DoSomething: 0.3999
       NoOp: 0.6
@@ -126,16 +128,17 @@ user_segments:
         seed_events: ['Home','ExploreCampaigns','OfferingCampaigns','DesignPartnerCampaigns']
         exit_events: ['Logout']
     event_attributes: 
-      predefined: 
-        ExploreLooks:
-          DesignPattern: 
-            AquaDelight: 0.5
-            SereneSummer: 0.08
-            TealMeadows: 0.07
-            VanillaTwilight: 0.05
-            PebbleStudio: 0.3
+      predefined:
       default:
       custom:
+    event_decorators:
+      ExploreLooks:
+        DesignPattern: 
+          AquaDelight: 0.5
+          SereneSummer: 0.08
+          TealMeadows: 0.07
+          VanillaTwilight: 0.05
+          PebbleStudio: 0.3
     user_attributes:
       default:
         -
@@ -148,9 +151,10 @@ user_segments:
           key: Age
           order_level: 1
           values:
-            LessThan18: 0.4
+            15-18: 0.4
             18-25: 0.4
-            MoreThan25: 0.2
+            25-35: 0.2
+          data_type: Numerical
         -
           key: City
           order_level: 3

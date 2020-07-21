@@ -33,12 +33,14 @@ type SegmentProbMap struct {
 	predefinedEventAttrProbMap map[string]map[string]RangeMapMultiplierTuple
 	UserToUserAttributeMap map[string]map[string]string
 	EventToEventAttributeMap map[string]map[string]string
+	EventDecoratorProbMap map[string]map[string]RangeMapMultiplierTuple
 }
 
 type YesOrNoProbablityMap struct {
 	SeedNewUser RangeMapMultiplierTuple
 	AddCustomEventAttribute RangeMapMultiplierTuple
 	AddCustomUserAttribute RangeMapMultiplierTuple
+	BringExistingUser RangeMapMultiplierTuple
 }
 type ProbMap struct {
 	yesOrNoProbMap YesOrNoProbablityMap
@@ -47,8 +49,8 @@ type ProbMap struct {
 
 func ComputeYesOrNoProbablityMap(trueProb float64, tag string)(RangeMapMultiplierTuple)  {
 	probMap := make(map[string]float64)
-	probMap["Yes"] = trueProb
-	probMap["No"] = (1.0 - trueProb)
+	probMap[YES] = trueProb
+	probMap[NO] = (1.0 - trueProb)
 	return ComputeRangeMap(probMap, fmt.Sprintf("%s-%s", "YesOrNo", tag))
 }
 
@@ -94,6 +96,7 @@ func PreComputeRangeMap(segment config.UserSegmentV2) (SegmentProbMap) {
 	probMap.EventAttributeRule = make(map[string]map[string]config.AttributeRule)
 	probMap.EventCorrelationMapNormalized = make(map[string]map[string]float64)
 	probMap.predefinedEventAttrProbMap = make(map[string]map[string]RangeMapMultiplierTuple)
+	probMap.EventDecoratorProbMap = make(map[string]map[string]RangeMapMultiplierTuple)
 
 	for item1, element1 := range segment.Event_probablity_map.Correlation_matrix.Events {
 		eventCorrelations := make(map[string]float64)
@@ -120,7 +123,7 @@ func PreComputeRangeMap(segment config.UserSegmentV2) (SegmentProbMap) {
 		}
 	}
 
-	events["EventCorrelation"] = (1.0 - sum)
+	events[EVENTCORRELATION] = (1.0 - sum)
 	probMap.eventProbMap = ComputeRangeMap(events, "Event")
 	probMap.activityProbMap = ComputeRangeMap(segment.Activity_probablity_map, "Actiivity")
 
@@ -129,6 +132,14 @@ func PreComputeRangeMap(segment config.UserSegmentV2) (SegmentProbMap) {
 		for item2, element2 := range element1 {
 			probMap.predefinedEventAttrProbMap[item1][item2] = 
 				ComputeRangeMap(element2, fmt.Sprintf("%s-%s-%s","PredefinedMap",item1, item2))
+		}
+	}
+
+	for item1, element1 := range segment.Event_decorators{
+		probMap.EventDecoratorProbMap[item1] = make(map[string]RangeMapMultiplierTuple)
+		for item2, element2 := range element1 {
+			probMap.EventDecoratorProbMap[item1][item2] = 
+				ComputeRangeMap(element2, fmt.Sprintf("%s-%s-%s","EventDecorator",item1, item2))
 		}
 	}
 

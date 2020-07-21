@@ -10,6 +10,9 @@ import(
 	"fmt"
 	Log "../utils/Log"
 	"../utils"
+	"strconv"
+	"strings"
+	"math/rand"
 )
 
 
@@ -89,11 +92,25 @@ func PickAttributes(attributes []config.AttributeData, attributeProbMap Attribut
 				attributeProbMap.Attributes_OrderOver1[element.Key][attr[element.Dependency]], 
 				fmt.Sprintf("UserAttribute:%s",element.Dependency))
 		}
+		if(element.Data_type == NUMERICAL){
+			attr[element.Key] = fmt.Sprintf("%v", GetValueFromRange(attr[element.Key]))
+		}
+			
 	}
 	return attr
 }
 
-func ReassignProbablity(probMap map[string]valueBoolTuple, prevEvent string) (map[string]float64){
+func GetValueFromRange(value string) int {
+	num := strings.Split(value, "-")
+	if(len(num) != 2){
+		Log.Error.Fatal("Incorrect numerical range", value)
+	}
+	start, _ := strconv.Atoi(num[0])
+	end, _ := strconv.Atoi(num[1])
+	return start + rand.Intn(end-start+1)
+}
+
+func ReassignProbablity(probMap map[string]valueBoolTuple, tag string) (map[string]float64){
 	// Compute new probablities - Should be straight forward
 	// Generate new range map
 	// check 
@@ -110,7 +127,7 @@ func ReassignProbablity(probMap map[string]valueBoolTuple, prevEvent string) (ma
 		}
 	}
 	if(sum_changed >= 1.0){
-		Log.Error.Fatal("Sum Probablities >= 1.0. Cannot Reassign ", prevEvent)
+		Log.Error.Fatal("Sum Probablities >= 1.0. Cannot Reassign ", tag)
 	}
 	remainingProb := 1.0 - sum_changed
 	for item, element := range probMap {

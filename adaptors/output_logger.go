@@ -6,6 +6,8 @@ For now, it is extended to File writer and Log Writer
 */
 
 type Writer interface{
-	Write(string)
+	WriteOutput(string)
 	RegisterOutputFile(string)
+	WriteUserData(string)
+	RegisterUserDataFile(string)
 }
