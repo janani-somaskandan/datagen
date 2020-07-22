@@ -163,7 +163,7 @@ func GetUserAttributes(probMap ProbMap, segmentProbMap SegmentProbMap, segmentCo
 		segmentConfig.User_attributes.Default,
 		segmentProbMap.defaultUserAttrProbMap)
 	if(AddCustomUserAttributeOrNot(probMap)){
-		utils.AppendMaps(userAttr, PickAttributes(
+		userAttr = utils.AppendMaps(userAttr, PickAttributes(
 			segmentConfig.User_attributes.Custom,
 			segmentProbMap.customUserAttrProbMap))
 	}
@@ -183,11 +183,11 @@ func SetUserAttributes(segmentProbMap SegmentProbMap, segmentConfig config.UserS
 func GetEventAttributes(probMap ProbMap, segmentProbMap SegmentProbMap, segmentConfig config.UserSegmentV2,eventName string) map[string]string{
 	eventAttr := make(map[string]string)
 	eventAttr = PickPredefinedAttributes(segmentProbMap.predefinedEventAttrProbMap[eventName])
-	utils.AppendMaps(eventAttr, PickAttributes(
+	eventAttr = utils.AppendMaps(eventAttr, PickAttributes(
 		segmentConfig.Event_attributes.Default,
 		segmentProbMap.defaultEventAttrProbMap))
 	if(AddCustomEventAttributeOrNot(probMap)){
-		utils.AppendMaps(eventAttr, PickAttributes(
+		eventAttr = utils.AppendMaps(eventAttr, PickAttributes(
 			segmentConfig.Event_attributes.Custom,
 			segmentProbMap.customEventAttrProbMap))
 	}
