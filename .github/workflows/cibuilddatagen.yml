@@ -10,6 +10,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Compile the repo
-        run: go build datagen.go
+       - name: Run a multi-line script
+        run: |
+          ls .
+          ls /home/runner/go/src/
+
 
