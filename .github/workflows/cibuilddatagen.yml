@@ -16,5 +16,6 @@ jobs:
           go get gopkg.in/yaml.v2 
           go get gopkg.in/natefinch/lumberjack.v2
           go build ./datagen/main.go
+          go build ./datafeeder/main.go
 
 
