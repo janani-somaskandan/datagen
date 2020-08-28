@@ -15,3 +15,5 @@ There will be 'output.txt' int /datagen. you can either flush the contents/delet
 RUN go build main.go
 
 RUN go run main.go
+
+Testing CI
