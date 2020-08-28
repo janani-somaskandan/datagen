@@ -13,6 +13,8 @@ jobs:
       - name: Run a multi-line script
         run: |
           ls .
+          go get gopkg.in/yaml.v2 
+          go get gopkg.in/natefinch/lumberjack.v2
           go build ./datagen/main.go
 
 
