@@ -13,6 +13,6 @@ jobs:
       - name: Run a multi-line script
         run: |
           ls .
-          ls /home/runner/go/src/
+          go build ./datagen/main.go
 
 
