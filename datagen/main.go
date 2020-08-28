@@ -14,5 +14,5 @@ import(
 func main(){
 	Log.RegisterLogFiles()
 	registration.RegisterHandlers()
-	operations.OperateV1()
+	operations.OperateV2()
 }  
