@@ -1,0 +1,279 @@
+# Assign Probablitites for independent events so that (1 - sum of probablities of independent events)
+# will be the total probablity of correlated events
+---
+output_file_name: test1.log
+activity_time_in_seconds: 3600
+real_time: false
+user_id_prefix: U
+new_user_poll_time: 30
+new_user_probablity: 0.7
+per_tick_new_user_seed_count: 10
+custom_user_attribute_probablity: 0.3
+custom_event_attribute_probablity: 0.4
+user_seed_number: 10001
+user_segments: 
+  segment1:
+    start_time: 2020-07-20 00:00:00
+    number_of_users: 10
+    activity_ticker_in_seconds: 5
+    activity_probablity_map:
+      DoSomething: 0.3999
+      NoOp: 0.6
+      Exit: 0.0001
+    event_probablity_map:
+      correlation_matrix:
+        events:
+          Home:
+            Create_Ad: RULE1
+            Performance_History: 0.2
+            Payment_History: RULE4
+            Activity_History: 0.07
+            Add_Payment_Instrument: 0.05
+            Contact_Us: RULE2
+            Help_Desk: 0.05
+          Help_Desk:
+            Raise_Complaint: 0.9 
+            Logout: 0.1
+          Raise_Complaint:
+            Logout: 1.0
+          Contact_Us:
+            Logout: 1.0
+          Payment_History:
+            Logout: 1.0
+          Activity_History:
+            Logout: 1.0
+          Performance_History:
+            Performance_Improvements_Suggestion: 0.7
+            Modify_Targetting: 0.1
+            Logout: 0.2
+          Performance_Improvements_Suggestion:
+            Performance_History: 0.1
+            Modify_Targetting: 0.6
+            Logout: 0.3
+          Modify_Targetting:
+            Performance_Improvements_Suggestion: 0.1
+            Logout: 0.9
+          Add_Payment_Instrument:
+            Logout: 0.7
+            Add_Credit_card: RULE3
+          Add_Credit_card:
+            Logout: 1.0
+          Create_Ad:
+            Check_Bid_Details: 0.6
+            Check_Targetting_Details: 0.2
+            Upload_Image: 0.2
+          Check_Bid_Details:
+            Home: 0.3
+            Check_Targetting_Details: 0.7
+          Check_Targetting_Details:
+            Upload_Image: 0.7
+            Change_Presuggested_Targetting: 0.29
+            Create_Ad: 0.01
+          Change_Presuggested_Targetting:
+            Upload_Image: 0.99
+            Create_Ad: 0.01
+          Upload_Image:
+            Create_Ad: 0.01
+            Check_Ad_Preview: 0.99
+          Check_Ad_Preview:
+            Create_Ad: 0.01
+            Submit_Ad: 0.99
+          Submit_Ad:
+            Logout: 0.5
+            Create_Ad: 0.5
+          Logout:
+            Logout: 1.0
+        seed_events: ['Home']
+        exit_events: ['Logout']
+    event_attributes: 
+      predefined: 
+        Home:
+          Category: 
+            PAGE_VIEW: 1.0
+        Help_Desk:
+          Category: 
+            PAGE_VIEW: 1.0
+        Raise_Complaint:
+          Category: 
+            CLICK_BUTTON: 1.0
+        Contact_Us:
+          Category: 
+            PAGE_VIEW: 1.0
+        Payment_History:
+          Category: 
+            PAGE_VIEW: 1.0
+        Activity_History:
+          Category: 
+            PAGE_VIEW: 1.0
+        Performance_History:
+          Category: 
+            PAGE_VIEW: 1.0
+        Performance_Improvements_Suggestion:
+          Category: 
+            PAGE_VIEW: 1.0
+        Modify_Targetting:
+          Category: 
+            CLICK_BUTTON: 1.0
+        Add_Payment_Instrument:
+          Category: 
+            PAGE_VIEW: 1.0
+        Add_Credit_card:
+          Category: 
+            CLICK_BUTTON: 1.0
+        Create_Ad:
+          Category: 
+            PAGE_VIEW: 1.0
+        Check_Bid_Details:
+          Category: 
+            PAGE_VIEW: 1.0
+        Check_Targetting_Details:
+          Category: 
+            PAGE_VIEW: 1.0
+        Change_Presuggested_Targetting:
+          Category: 
+            CLICK_BUTTON: 1.0
+        Upload_Image:
+          Category: 
+            PAGE_VIEW: 1.0
+        Check_Ad_Preview:
+          Category: 
+            PAGE_VIEW: 1.0
+        Submit_Ad:
+          Category: 
+            CLICK_BUTTON: 1.0
+        Logout:
+          Category: 
+            CLICK_BUTTON: 1.0
+      default:
+        -
+          key: Type
+          order_level: 1
+          values:
+            Travel: 0.5
+            Finance: 0.5
+      custom:
+        -
+          key: utm-campaign
+          order_level: 1
+          values:
+            summer-sale: 0.5
+            winter-sale: 0.5
+    user_attributes:
+      default:
+        -
+          key: Gender
+          order_level: 1
+          values:
+            Male: 0.5
+            Female: 0.5
+        -
+          key: Age
+          order_level: 1
+          values:
+            LessThan18: 0.4
+            18-25: 0.4
+            MoreThan25: 0.2
+        -
+          key: City
+          order_level: 3
+          values:
+            Karnataka:
+              Bengaluru: 0.5
+              Mysore: 0.5
+            TamilNadu:
+              Chennai: 0.5
+              Hosur: 0.5
+            California:
+              SunnyVale: 0.5
+              SanJose: 0.5
+            WashingtonDC:
+              Seattle: 0.5
+              Redmond: 0.5
+            Bristol:
+              Bristol: 1.0
+          dependency: State
+        -
+          key: State
+          order_level: 2
+          values:
+            India:
+              Karnataka : 0.8
+              TamilNadu: 0.2
+            US:
+              WashingtonDC: 0.5
+              California: 0.5
+            UK:
+              Bristol: 1.0
+          dependency: Country
+        -
+          key: Country
+          order_level: 1
+          values:
+            India: 0.2
+            US: 0.5
+            UK: 0.3
+      custom:
+        -
+          key: DeviceType
+          order_level: 1
+          values:
+            Desktop: 0.5
+            Mobile: 0.5
+        -
+          key: OS
+          order_level: 2
+          values:
+            Desktop:
+              Windows: 0.3
+              MacOS: 0.3
+              Linux: 0.4
+            Mobile:
+              Android: 0.5
+              iOS: 0.5
+          dependency: DeviceType
+    set_attributes: true 
+    rules:
+      RULE1:
+        real_time_wait: 6
+        overall_probablity: 0.5
+        attribute_weights:
+          -
+            probablity: 0.7
+            attributes: 
+              Age: 
+                -
+                  18-25
+      RULE2:
+        real_time_wait: 8
+        overall_probablity: 0.05
+        attribute_weights:
+          -
+            probablity: 0.2
+            attributes:
+              Gender: 
+                -
+                  Male
+              Country:
+                - 
+                  India
+      RULE3:
+        real_time_wait: 10
+        overall_probablity: 0.3
+        attribute_weights:
+          -
+            probablity: 0.9
+            attributes:
+              Country: 
+                -
+                  US
+      RULE4:
+        real_time_wait: 5
+        overall_probablity: 0.08
+        attribute_weights:
+          -
+            probablity: 0.25
+            attributes:
+              Country: 
+                -
+                  UK
+...
